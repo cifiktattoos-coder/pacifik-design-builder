@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pacifik Elements — Design Builder</title>
+<style>
+  :root {
+    --bg: #0e0c0a;
+    --panel: #16130f;
+    --panel-2: #1f1b15;
+    --ink: #f5efe4;
+    --muted: #b6ac98;
+    --accent: #c8975a;
+    --accent-2: #8a5a2b;
+    --line: #2a241c;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink);
+    background: radial-gradient(1200px 800px at 70% 10%, #1a1611 0%, #0e0c0a 60%) fixed;
+    overflow: hidden;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    grid-template-rows: 56px 1fr 64px;
+    grid-template-areas:
+      "header header header"
+      "library stage controls"
+      "library stage footer";
+    height: 100vh;
+    gap: 1px;
+    background: var(--line);
+  }
+  header {
+    grid-area: header;
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+  }
+  .brand {
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 13px;
+    color: var(--accent);
+  }
+  .brand span { color: var(--ink); }
+  .pill {
+    margin-left: auto;
+    background: var(--accent);
+    color: #1b1207;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 0;
+  }
+  .pill.locked { background: #3a3128; color: var(--muted); }
+  .pill:hover { filter: brightness(1.1); }
+
+  aside.library {
+    grid-area: library;
+    background: var(--panel);
+    padding: 16px;
+    overflow-y: auto;
+  }
+  aside.controls {
+    grid-area: controls;
+    background: var(--panel);
+    padding: 16px;
+    overflow-y: auto;
+  }
+  .stage {
+    grid-area: stage;
+    background:
+      radial-gradient(600px 400px at 50% 30%, #2a2218 0%, #0e0c0a 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  .stage canvas { display: block; width: 100%; height: 100%; }
+
+  footer {
+    grid-area: footer;
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  h3 {
+    margin: 0 0 12px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .motif-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .motif {
+    aspect-ratio: 1 / 1;
+    background: var(--panel-2);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: grab;
+    display: grid;
+    place-items: center;
+    transition: border-color .15s, transform .15s;
+    padding: 6px;
+  }
+  .motif:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .motif svg { width: 100%; height: 100%; }
+  .motif.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,151,90,.25); }
+
+  .body-parts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .body-parts button {
+    background: var(--panel-2);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 10px;
+    font-size: 12px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .body-parts button.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .ai-box {
+    margin-top: 18px;
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    padding: 12px;
+  }
+  .ai-box.locked { opacity: .55; }
+  .ai-box label { font-size: 11px; color: var(--muted); display:block; margin-bottom: 6px; letter-spacing: .12em; text-transform: uppercase; }
+  .ai-box textarea {
+    width: 100%;
+    min-height: 64px;
+    background: #0c0a07;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    resize: vertical;
+  }
+  .ai-box button {
+    margin-top: 8px;
+    width: 100%;
+    background: var(--accent);
+    color: #1b1207;
+    border: 0;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 12px;
+  }
+  .ai-box button:disabled { background: #3a3128; color: var(--muted); cursor: not-allowed; }
+
+  .slider-row { margin-top: 12px; }
+  .slider-row label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 4px; }
+  .slider-row input[type=range] { width: 100%; accent-color: var(--accent); }
+
+  .hint {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: rgba(14,12,10,.6);
+    padding: 6px 12px;
+    border-radius: 999px;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+  }
+
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.7);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 50;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 420px;
+    text-align: center;
+  }
+  .modal h2 { margin: 0 0 8px; }
+  .modal p { color: var(--muted); margin: 0 0 18px; font-size: 14px; line-height: 1.5; }
+  .modal .row { display: flex; gap: 8px; }
+  .modal button { flex: 1; padding: 12px; border-radius: 4px; border: 0; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; }
+  .modal .primary { background: var(--accent); color: #1b1207; }
+  .modal .ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="brand">PACIFIK <span>ELEMENTS</span> — Design Builder</div>
+    <button id="unlockBtn" class="pill locked">🔒 Unlock AI Generate</button>
+  </header>
+
+  <aside class="library">
+    <h3>Motif Library</h3>
+    <div id="motifGrid" class="motif-grid"></div>
+    <p style="font-size:11px;color:var(--muted);line-height:1.5;margin-top:14px;">
+      Drag a motif onto the mannequin, or click to apply to the selected body part.
+    </p>
+  </aside>
+
+  <main class="stage">
+    <canvas id="three"></canvas>
+    <div class="hint">drag to rotate · scroll to zoom</div>
+  </main>
+
+  <aside class="controls">
+    <h3>Body Region</h3>
+    <div class="body-parts" id="bodyParts">
+      <button data-part="chest" class="active">Chest</button>
+      <button data-part="leftArm">Left Arm</button>
+      <button data-part="rightArm">Right Arm</button>
+      <button data-part="back">Back</button>
+      <button data-part="leftLeg">Left Leg</button>
+      <button data-part="rightLeg">Right Leg</button>
+    </div>
+
+    <div class="slider-row">
+      <label>Scale <span id="scaleVal">1.0×</span></label>
+      <input type="range" id="scale" min="0.3" max="2" step="0.05" value="1" />
+    </div>
+    <div class="slider-row">
+      <label>Rotation <span id="rotVal">0°</span></label>
+      <input type="range" id="rot" min="-180" max="180" step="1" value="0" />
+    </div>
+    <div class="slider-row">
+      <label>Offset X <span id="xVal">0</span></label>
+      <input type="range" id="offX" min="-0.5" max="0.5" step="0.01" value="0" />
+    </div>
+    <div class="slider-row">
+      <label>Offset Y <span id="yVal">0</span></label>
+      <input type="range" id="offY" min="-0.5" max="0.5" step="0.01" value="0" />
+    </div>
+
+    <div class="ai-box locked" id="aiBox">
+      <label>AI Generate (locked)</label>
+      <textarea id="aiPrompt" placeholder="e.g. shark teeth + ocean waves, bold lines, half-sleeve"></textarea>
+      <button id="aiGenBtn" disabled>Generate Design</button>
+    </div>
+
+    <div style="margin-top:18px; display:flex; gap:8px;">
+      <button id="clearBtn" class="pill" style="flex:1; background:transparent; color:var(--ink); border:1px solid var(--line);">Clear</button>
+      <button id="saveBtn" class="pill" style="flex:1;">Save Look</button>
+    </div>
+  </aside>
+
+  <footer>
+    <span>Pacifik Elements · Polynesian Tattoo Preview</span>
+    <span id="status">Ready</span>
+  </footer>
+</div>
+
+<div class="modal-bg" id="paywall">
+  <div class="modal">
+    <h2 style="color:var(--accent);">Unlock AI Design Pass</h2>
+    <p>Get unlimited AI-generated Polynesian designs on your live 3D mannequin for 24 hours. <strong>$7.99</strong></p>
+    <div class="row">
+      <button class="ghost" onclick="document.getElementById('paywall').classList.remove('open')">Maybe later</button>
+      <button class="primary" id="payBtn">Unlock for $7.99</button>
+    </div>
+    <p style="margin-top:14px;font-size:11px;">In production this opens Shopify Checkout. For now, click Unlock to demo the flow.</p>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ---------- Polynesian motif library (procedural SVG) ----------
+const motifs = [
+  { id: 'sharkTeeth',   name: 'Shark Teeth',   svg: makeSharkTeeth() },
+  { id: 'oceanWaves',   name: 'Ocean Waves',   svg: makeWaves() },
+  { id: 'sunBurst',     name: 'Sun Burst',     svg: makeSunBurst() },
+  { id: 'tikiFace',     name: 'Tiki Face',     svg: makeTiki() },
+  { id: 'spearheads',   name: 'Spearheads',    svg: makeSpearheads() },
+  { id: 'turtleShell',  name: 'Turtle Shell',  svg: makeTurtle() },
+  { id: 'enata',        name: 'Enata',         svg: makeEnata() },
+  { id: 'frigateBird',  name: 'Frigate Bird',  svg: makeFrigate() },
+];
+
+function svgWrap(inner, vb='0 0 100 100') {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${inner}</svg>`;
+}
+function makeSharkTeeth(){
+  let p = '';
+  for (let i=0;i<6;i++){ const x = i*16+4; p += `<path d="M${x} 80 L${x+8} 30 L${x+16} 80 Z" fill="#f5efe4"/>`; }
+  return svgWrap(p);
+}
+function makeWaves(){
+  let p = '';
+  for (let r=0;r<3;r++){
+    p += `<path d="M0 ${30+r*20} Q 25 ${10+r*20} 50 ${30+r*20} T 100 ${30+r*20}" stroke="#f5efe4" stroke-width="3" fill="none"/>`;
+  }
+  return svgWrap(p);
+}
+function makeSunBurst(){
+  let p = `<circle cx="50" cy="50" r="14" fill="#f5efe4"/>`;
+  for (let i=0;i<12;i++){
+    const a = (i/12)*Math.PI*2;
+    const x1 = 50+Math.cos(a)*20, y1 = 50+Math.sin(a)*20;
+    const x2 = 50+Math.cos(a)*42, y2 = 50+Math.sin(a)*42;
+    p += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#f5efe4" stroke-width="4"/>`;
+  }
+  return svgWrap(p);
+}
+function makeTiki(){
+  return svgWrap(`
+    <path d="M30 10 H70 V30 Q70 45 60 50 Q70 60 70 75 Q70 90 50 92 Q30 90 30 75 Q30 60 40 50 Q30 45 30 30 Z" fill="#f5efe4"/>
+    <circle cx="42" cy="35" r="4" fill="#0e0c0a"/>
+    <circle cx="58" cy="35" r="4" fill="#0e0c0a"/>
+    <path d="M40 65 Q50 75 60 65" stroke="#0e0c0a" stroke-width="3" fill="none"/>
+  `);
+}
+function makeSpearheads(){
+  let p = '';
+  for (let i=0;i<4;i++){
+    const x = 12+i*24;
+    p += `<path d="M${x} 90 L${x+10} 10 L${x+20} 90 L${x+10} 70 Z" fill="#f5efe4"/>`;
+  }
+  return svgWrap(p);
+}
+function makeTurtle(){
+  return svgWrap(`
+    <ellipse cx="50" cy="50" rx="36" ry="28" fill="#f5efe4"/>
+    <path d="M30 50 Q50 30 70 50 Q50 70 30 50 Z" fill="#0e0c0a"/>
+    <circle cx="50" cy="50" r="4" fill="#f5efe4"/>
+    <circle cx="20" cy="50" r="6" fill="#f5efe4"/>
+    <circle cx="80" cy="50" r="6" fill="#f5efe4"/>
+    <circle cx="35" cy="22" r="6" fill="#f5efe4"/>
+    <circle cx="65" cy="22" r="6" fill="#f5efe4"/>
+    <circle cx="35" cy="78" r="6" fill="#f5efe4"/>
+    <circle cx="65" cy="78" r="6" fill="#f5efe4"/>
+  `);
+}
+function makeEnata(){
+  let p = '';
+  for (let i=0;i<4;i++){
+    const x = 12+i*24;
+    p += `<circle cx="${x+10}" cy="20" r="6" fill="#f5efe4"/>`;
+    p += `<path d="M${x+4} 30 L${x+16} 30 L${x+20} 70 L${x+10} 60 L${x} 70 Z" fill="#f5efe4"/>`;
+  }
+  return svgWrap(p);
+}
+function makeFrigate(){
+  return svgWrap(`
+    <path d="M10 50 Q30 20 50 50 Q70 20 90 50 Q70 35 50 60 Q30 35 10 50 Z" fill="#f5efe4"/>
+    <path d="M50 50 L50 70" stroke="#f5efe4" stroke-width="4"/>
+  `);
+}
+
+// ---------- Render motif library ----------
+const motifGrid = document.getElementById('motifGrid');
+let activeMotif = null;
+motifs.forEach(m => {
+  const div = document.createElement('div');
+  div.className = 'motif';
+  div.title = m.name;
+  div.dataset.id = m.id;
+  div.innerHTML = m.svg;
+  div.addEventListener('click', () => selectMotif(m, div));
+  motifGrid.appendChild(div);
+});
+
+function selectMotif(m, el){
+  activeMotif = m;
+  document.querySelectorAll('.motif').forEach(n=>n.classList.remove('active'));
+  el?.classList.add('active');
+  applyToActivePart();
+  setStatus(`Applied: ${m.name}`);
+}
+
+// ---------- Three.js scene ----------
+const canvas = document.getElementById('three');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+camera.position.set(0, 1.6, 5.5);
+
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(0, 1.4, 0);
+controls.enableDamping = true;
+controls.minDistance = 2.5;
+controls.maxDistance = 9;
+
+// Lighting — warm key, cool rim, soft fill
+const key = new THREE.DirectionalLight(0xffe0b8, 1.4); key.position.set(2, 4, 3); scene.add(key);
+const rim = new THREE.DirectionalLight(0x6b8cff, 0.5); rim.position.set(-3, 2, -2); scene.add(rim);
+const fill = new THREE.HemisphereLight(0xfff0d8, 0x1a1208, 0.5); scene.add(fill);
+
+// Floor disc
+const floor = new THREE.Mesh(
+  new THREE.CircleGeometry(2.2, 64),
+  new THREE.MeshStandardMaterial({ color: 0x1a1611, roughness: 1 })
+);
+floor.rotation.x = -Math.PI/2;
+floor.position.y = 0;
+scene.add(floor);
+
+// ---------- Mannequin (low-poly humanoid) ----------
+// Each body part has its own dynamic CanvasTexture for tattoo placement.
+const skinColor = 0xc9a07a;
+const skinMat = (canvasTex) => new THREE.MeshStandardMaterial({
+  color: skinColor,
+  roughness: 0.7,
+  metalness: 0.0,
+  map: canvasTex,
+});
+
+const PART_TEX_SIZE = 512;
+
+function makePartTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = PART_TEX_SIZE;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#c9a07a';
+  ctx.fillRect(0,0,PART_TEX_SIZE,PART_TEX_SIZE);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return { canvas: c, ctx, tex, design: null };
+}
+
+const parts = {}; // partKey -> { mesh, tex object, ... }
+
+function buildPart(name, geometry, position, rotation = [0,0,0]) {
+  const t = makePartTexture();
+  const mesh = new THREE.Mesh(geometry, skinMat(t.tex));
+  mesh.position.set(...position);
+  mesh.rotation.set(...rotation);
+  mesh.userData.partKey = name;
+  parts[name] = { mesh, ...t };
+  scene.add(mesh);
+  return mesh;
+}
+
+// Torso (front = chest, back = back). We split logically — same mesh, different texture regions.
+// For simplicity we use one torso mesh but two virtual regions handled via offset in canvas.
+const torsoGeom = new THREE.CapsuleGeometry(0.45, 0.9, 6, 16);
+buildPart('torso', torsoGeom, [0, 1.45, 0]);
+
+// Head
+const headGeom = new THREE.SphereGeometry(0.27, 24, 24);
+const headMesh = new THREE.Mesh(headGeom, new THREE.MeshStandardMaterial({color: skinColor, roughness:.7}));
+headMesh.position.set(0, 2.25, 0);
+scene.add(headMesh);
+
+// Neck
+const neckGeom = new THREE.CylinderGeometry(0.1, 0.13, 0.18, 16);
+const neckMesh = new THREE.Mesh(neckGeom, new THREE.MeshStandardMaterial({color: skinColor, roughness:.7}));
+neckMesh.position.set(0, 2.0, 0);
+scene.add(neckMesh);
+
+// Arms
+const armGeom = new THREE.CylinderGeometry(0.11, 0.13, 0.95, 16);
+buildPart('leftArm',  armGeom, [-0.6, 1.5, 0], [0, 0, Math.PI/12]);
+buildPart('rightArm', armGeom, [ 0.6, 1.5, 0], [0, 0, -Math.PI/12]);
+
+// Forearms (visual only, no tattoo region for v1)
+const forearmGeom = new THREE.CylinderGeometry(0.09, 0.11, 0.85, 16);
+const forearmMat = new THREE.MeshStandardMaterial({color: skinColor, roughness:.7});
+const lFore = new THREE.Mesh(forearmGeom, forearmMat); lFore.position.set(-0.78,0.6,0); lFore.rotation.z = Math.PI/12; scene.add(lFore);
+const rFore = new THREE.Mesh(forearmGeom, forearmMat); rFore.position.set( 0.78,0.6,0); rFore.rotation.z = -Math.PI/12; scene.add(rFore);
+
+// Legs
+const legGeom = new THREE.CylinderGeometry(0.16, 0.18, 1.0, 16);
+buildPart('leftLeg',  legGeom, [-0.22, 0.5, 0]);
+buildPart('rightLeg', legGeom, [ 0.22, 0.5, 0]);
+const shinGeom = new THREE.CylinderGeometry(0.13, 0.15, 0.85, 16);
+const lShin = new THREE.Mesh(shinGeom, forearmMat); lShin.position.set(-0.22,-0.45,0); scene.add(lShin);
+const rShin = new THREE.Mesh(shinGeom, forearmMat); rShin.position.set( 0.22,-0.45,0); scene.add(rShin);
+
+// Hips
+const hipGeom = new THREE.SphereGeometry(0.28, 16, 16);
+const hipMesh = new THREE.Mesh(hipGeom, forearmMat); hipMesh.position.set(0, 0.95, 0); hipMesh.scale.set(1.1, 0.6, 0.9); scene.add(hipMesh);
+
+// ---------- Tattoo painting ----------
+let activePart = 'chest';
+const partToCanvasKey = {
+  chest:    'torso',
+  back:     'torso',
+  leftArm:  'leftArm',
+  rightArm: 'rightArm',
+  leftLeg:  'leftLeg',
+  rightLeg: 'rightLeg',
+};
+// Each region defines the rectangle of its part's canvas to paint into.
+// Texture wraps cylindrically; U is around the cylinder, V is along height.
+const regionMap = {
+  chest:    { u: 0.0,  v: 0.45, w: 0.5, h: 0.4 }, // front of torso
+  back:     { u: 0.5,  v: 0.45, w: 0.5, h: 0.4 }, // back of torso
+  leftArm:  { u: 0.0,  v: 0.2,  w: 1.0, h: 0.6 },
+  rightArm: { u: 0.0,  v: 0.2,  w: 1.0, h: 0.6 },
+  leftLeg:  { u: 0.0,  v: 0.2,  w: 1.0, h: 0.6 },
+  rightLeg: { u: 0.0,  v: 0.2,  w: 1.0, h: 0.6 },
+};
+
+const transforms = {}; // partKey -> {scale, rot, offX, offY}
+function defaultT(){ return {scale:1, rot:0, offX:0, offY:0}; }
+Object.keys(regionMap).forEach(k => transforms[k] = defaultT());
+
+function paintRegion(partKey) {
+  const canvasKey = partToCanvasKey[partKey];
+  const part = parts[canvasKey];
+  if (!part) return;
+  const { ctx, canvas, tex } = part;
+  const region = regionMap[partKey];
+
+  // For torso we share canvas between chest+back, so don't wipe the whole thing.
+  // We clear just the region.
+  const rx = region.u * PART_TEX_SIZE;
+  const ry = region.v * PART_TEX_SIZE;
+  const rw = region.w * PART_TEX_SIZE;
+  const rh = region.h * PART_TEX_SIZE;
+
+  ctx.save();
+  ctx.fillStyle = '#c9a07a';
+  ctx.fillRect(rx, ry, rw, rh);
+  ctx.restore();
+
+  const design = part.designs?.[partKey];
+  if (design) {
+    const t = transforms[partKey];
+    ctx.save();
+    ctx.translate(rx + rw/2 + t.offX*rw, ry + rh/2 + t.offY*rh);
+    ctx.rotate(t.rot * Math.PI / 180);
+    const dw = rw * t.scale;
+    const dh = rh * t.scale;
+    ctx.globalAlpha = 0.95;
+    ctx.drawImage(design.img, -dw/2, -dh/2, dw, dh);
+    ctx.restore();
+  }
+  tex.needsUpdate = true;
+}
+
+function applyDesignToPart(partKey, img) {
+  const canvasKey = partToCanvasKey[partKey];
+  const part = parts[canvasKey];
+  part.designs = part.designs || {};
+  part.designs[partKey] = { img };
+  paintRegion(partKey);
+}
+
+function applyToActivePart() {
+  if (!activeMotif) return;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => applyDesignToPart(activePart, img);
+  img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(activeMotif.svg);
+}
+
+// ---------- UI wiring ----------
+document.querySelectorAll('#bodyParts button').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#bodyParts button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    activePart = b.dataset.part;
+    // Load that region's transform values into sliders
+    const t = transforms[activePart];
+    document.getElementById('scale').value = t.scale;
+    document.getElementById('rot').value = t.rot;
+    document.getElementById('offX').value = t.offX;
+    document.getElementById('offY').value = t.offY;
+    syncSliderLabels();
+    setStatus(`Region: ${activePart}`);
+  });
+});
+
+function syncSliderLabels(){
+  document.getElementById('scaleVal').textContent = (+document.getElementById('scale').value).toFixed(2)+'×';
+  document.getElementById('rotVal').textContent = document.getElementById('rot').value+'°';
+  document.getElementById('xVal').textContent = (+document.getElementById('offX').value).toFixed(2);
+  document.getElementById('yVal').textContent = (+document.getElementById('offY').value).toFixed(2);
+}
+['scale','rot','offX','offY'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const t = transforms[activePart];
+    t.scale = +document.getElementById('scale').value;
+    t.rot   = +document.getElementById('rot').value;
+    t.offX  = +document.getElementById('offX').value;
+    t.offY  = +document.getElementById('offY').value;
+    syncSliderLabels();
+    paintRegion(activePart);
+  });
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  Object.keys(parts).forEach(k => { parts[k].designs = {}; });
+  Object.keys(regionMap).forEach(k => paintRegion(k));
+  setStatus('Cleared');
+});
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  // Composite: render the scene to a PNG snapshot
+  renderer.render(scene, camera);
+  const url = renderer.domElement.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url; a.download = 'pacifik-design.png'; a.click();
+  setStatus('Saved snapshot');
+});
+
+// ---------- Paywall + AI Generate ----------
+let aiUnlocked = false;
+const unlockBtn = document.getElementById('unlockBtn');
+const aiBox = document.getElementById('aiBox');
+const aiBtn = document.getElementById('aiGenBtn');
+const paywall = document.getElementById('paywall');
+
+unlockBtn.addEventListener('click', () => paywall.classList.add('open'));
+document.getElementById('payBtn').addEventListener('click', () => {
+  // In production: kick off Shopify checkout for the "Design Pass" product, then
+  // verify entitlement on the page reload via cookie/customer metafield.
+  aiUnlocked = true;
+  unlockBtn.textContent = '✓ AI Unlocked';
+  unlockBtn.classList.remove('locked');
+  aiBox.classList.remove('locked');
+  aiBtn.disabled = false;
+  paywall.classList.remove('open');
+  setStatus('AI generation unlocked (demo)');
+});
+
+// API endpoint config:
+//   - Empty string ("") = same-origin (works once deployed to Vercel and the
+//     site is served from the same domain).
+//   - Or hardcode your Vercel URL, e.g. "https://pacifik-design-builder.vercel.app".
+//   - When opened as a local file:// URL, we fall back to the procedural mock
+//     so the demo still works offline.
+const API_BASE = '';
+
+aiBtn.addEventListener('click', async () => {
+  const prompt = document.getElementById('aiPrompt').value.trim();
+  if (!prompt) { setStatus('Enter a prompt first'); return; }
+  setStatus('Generating…');
+  aiBtn.disabled = true;
+  try {
+    const isLocalFile = location.protocol === 'file:';
+    const url = isLocalFile
+      ? await mockGenerate(prompt)
+      : await realGenerate(prompt, activePart);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      applyDesignToPart(activePart, img);
+      setStatus(isLocalFile ? 'Mock design applied (local mode)' : 'AI design applied');
+      aiBtn.disabled = false;
+    };
+    img.onerror = () => {
+      setStatus('Image failed to load');
+      aiBtn.disabled = false;
+    };
+    img.src = url;
+  } catch (e) {
+    setStatus('Generation failed: ' + e.message);
+    aiBtn.disabled = false;
+  }
+});
+
+async function realGenerate(prompt, bodyPart) {
+  const r = await fetch(`${API_BASE}/api/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      prompt,
+      bodyPart,
+      // TODO: pass real customerId once Shopify entitlement is wired
+      customerId: window.__pacifikCustomerId || null,
+    })
+  });
+  if (!r.ok) {
+    const t = await r.text();
+    throw new Error(`HTTP ${r.status}: ${t.slice(0, 120)}`);
+  }
+  const { url } = await r.json();
+  return url;
+}
+
+// Placeholder generator — draws a procedural "tribal" pattern from the prompt.
+// Will be replaced by a fetch() to /api/generate that proxies to Replicate.
+async function mockGenerate(prompt) {
+  return new Promise((resolve) => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 512;
+    const x = c.getContext('2d');
+    x.fillStyle = 'rgba(0,0,0,0)';
+    x.fillRect(0,0,512,512);
+    x.fillStyle = '#0e0c0a';
+    // hash prompt to seed
+    let s = 0; for (const ch of prompt) s = (s*31 + ch.charCodeAt(0)) >>> 0;
+    function rand(){ s = (s*1664525 + 1013904223) >>> 0; return s / 0xffffffff; }
+    // bands of triangles + waves
+    for (let y=0; y<512; y+=64) {
+      for (let xi=0; xi<512; xi+=32) {
+        const flip = rand() > 0.5;
+        x.beginPath();
+        if (flip){ x.moveTo(xi,y); x.lineTo(xi+32,y); x.lineTo(xi+16,y+24); }
+        else { x.moveTo(xi,y+32); x.lineTo(xi+32,y+32); x.lineTo(xi+16,y+8); }
+        x.closePath();
+        x.fill();
+      }
+    }
+    // wave overlay
+    x.strokeStyle = '#0e0c0a'; x.lineWidth = 6;
+    for (let yy=20; yy<512; yy+=80){
+      x.beginPath();
+      for (let xx=0; xx<=512; xx+=8){
+        const py = yy + Math.sin((xx+s%200)/30)*10;
+        if (xx===0) x.moveTo(xx,py); else x.lineTo(xx,py);
+      }
+      x.stroke();
+    }
+    setTimeout(()=>resolve(c.toDataURL('image/png')), 600);
+  });
+}
+
+// ---------- Status + resize + render loop ----------
+function setStatus(t){ document.getElementById('status').textContent = t; }
+function resize(){
+  const r = canvas.parentElement.getBoundingClientRect();
+  renderer.setSize(r.width, r.height, false);
+  camera.aspect = r.width / r.height;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+function tick(){
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+tick();
+
+// initial paints
+Object.keys(regionMap).forEach(k => paintRegion(k));
+syncSliderLabels();
+</script>
+</body>
+</html>

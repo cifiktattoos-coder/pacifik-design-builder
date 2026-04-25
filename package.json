@@ -1,0 +1,10 @@
+{
+  "name": "pacifik-design-builder",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-assisted Polynesian tattoo design builder for pacifikelements.com",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  }
+}
