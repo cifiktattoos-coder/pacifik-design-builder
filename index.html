@@ -2,310 +2,493 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Pacifik Elements — Design Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;700&display=swap" />
 <style>
+  /* -------------------------------------------------------------- design tokens */
   :root {
-    --bg: #0e0c0a;
-    --panel: #16130f;
-    --panel-2: #1f1b15;
-    --ink: #f5efe4;
-    --muted: #b6ac98;
-    --accent: #c8975a;
-    --accent-2: #8a5a2b;
-    --line: #2a241c;
+    --bg-0: #060912;
+    --bg-1: #0c1220;
+    --bg-2: #131b2d;
+    --line: rgba(255, 255, 255, 0.06);
+    --line-strong: rgba(255, 255, 255, 0.14);
+    --ink: #f6f4ee;
+    --ink-2: #c7cdd8;
+    --ink-3: #7d869b;
+    --gold: #d8b27c;
+    --gold-soft: #b08e5c;
+    --ocean: #2a6f9c;
+    --teal: #58c0c0;
+    --shadow-lg: 0 20px 60px -20px rgba(0, 0, 0, 0.65);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 22px;
   }
+
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body {
     margin: 0;
-    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(42, 111, 156, 0.15), transparent 60%),
+      radial-gradient(900px 500px at 0% 100%, rgba(216, 178, 124, 0.08), transparent 60%),
+      var(--bg-0);
     color: var(--ink);
-    background: radial-gradient(1200px 800px at 70% 10%, #1a1611 0%, #0e0c0a 60%) fixed;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
   }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  /* -------------------------------------------------------------- shell */
   .app {
     display: grid;
-    grid-template-columns: 280px 1fr 320px;
-    grid-template-rows: 56px 1fr 64px;
+    height: 100vh;
+    grid-template-rows: 64px 1fr 36px;
+    grid-template-columns: 320px 1fr 320px;
     grid-template-areas:
       "header header header"
-      "library stage controls"
-      "library stage footer";
-    height: 100vh;
-    gap: 1px;
-    background: var(--line);
+      "left   stage  right"
+      "status status status";
   }
-  header {
+  @media (max-width: 980px) {
+    .app {
+      grid-template-rows: 56px 50vh 1fr 32px;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "header"
+        "stage"
+        "right"
+        "status";
+    }
+    .left { display: none; }
+    .left.mobile-open { display: block; position: fixed; inset: 56px 0 0 0; z-index: 50; }
+  }
+
+  /* -------------------------------------------------------------- header */
+  .header {
     grid-area: header;
-    background: var(--panel);
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    gap: 16px;
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(6, 9, 18, 0.7);
+    backdrop-filter: saturate(140%) blur(10px);
+    z-index: 10;
   }
   .brand {
+    font-family: 'Cormorant Garamond', serif;
     font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    font-size: 13px;
-    color: var(--accent);
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
   }
-  .brand span { color: var(--ink); }
-  .pill {
-    margin-left: auto;
-    background: var(--accent);
-    color: #1b1207;
-    padding: 8px 14px;
+  .brand .accent { color: var(--gold); }
+  .brand .sep { color: var(--ink-3); margin: 0 8px; }
+  .brand .sub { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 11px; letter-spacing: 0.24em; color: var(--ink-3); text-transform: uppercase; }
+  .grow { flex: 1; }
+
+  .gender-toggle {
+    display: inline-flex;
+    background: var(--bg-2);
+    border: 1px solid var(--line-strong);
     border-radius: 999px;
-    font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border: 0;
+    padding: 3px;
   }
-  .pill.locked { background: #3a3128; color: var(--muted); }
-  .pill:hover { filter: brightness(1.1); }
+  .gender-toggle button {
+    border: 0; background: transparent; padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-3);
+    transition: all 0.18s ease;
+  }
+  .gender-toggle button.active { background: var(--gold); color: #1a1108; }
 
-  aside.library {
-    grid-area: library;
-    background: var(--panel);
-    padding: 16px;
+  .unlock {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--gold-soft);
+    background: linear-gradient(180deg, rgba(216, 178, 124, 0.18), rgba(216, 178, 124, 0.06));
+    color: var(--gold);
+    padding: 8px 16px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    transition: all 0.2s ease;
+  }
+  .unlock:hover { background: linear-gradient(180deg, rgba(216, 178, 124, 0.32), rgba(216, 178, 124, 0.12)); }
+  .unlock.unlocked { color: var(--teal); border-color: rgba(88, 192, 192, 0.5); }
+
+  .mobile-motifs-btn {
+    display: none;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-2);
+    color: var(--ink);
+    padding: 8px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  @media (max-width: 980px) { .mobile-motifs-btn { display: inline-flex; } }
+
+  /* -------------------------------------------------------------- left rail */
+  .left {
+    grid-area: left;
+    border-right: 1px solid var(--line);
+    background: var(--bg-1);
+    display: flex; flex-direction: column;
+    min-height: 0;
+  }
+  .left h2 {
+    margin: 0; padding: 16px 18px 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .nation-tabs {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 0 14px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .nation-tab {
+    border: 1px solid var(--line-strong);
+    background: transparent; color: var(--ink-2);
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 6px 10px; border-radius: 999px;
+    transition: all 0.15s ease;
+  }
+  .nation-tab:hover { border-color: var(--gold-soft); color: var(--gold); }
+  .nation-tab.active { background: var(--gold); color: #1a1108; border-color: var(--gold); }
+
+  .motif-scroll {
+    flex: 1;
     overflow-y: auto;
+    padding: 14px 14px 24px;
   }
-  aside.controls {
-    grid-area: controls;
-    background: var(--panel);
-    padding: 16px;
-    overflow-y: auto;
-  }
-  .stage {
-    grid-area: stage;
-    background:
-      radial-gradient(600px 400px at 50% 30%, #2a2218 0%, #0e0c0a 70%);
-    position: relative;
-    overflow: hidden;
-  }
-  .stage canvas { display: block; width: 100%; height: 100%; }
+  .motif-scroll::-webkit-scrollbar { width: 8px; }
+  .motif-scroll::-webkit-scrollbar-track { background: transparent; }
+  .motif-scroll::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; }
 
-  footer {
-    grid-area: footer;
-    background: var(--panel);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    font-size: 12px;
-    color: var(--muted);
+  .nation-group { margin-bottom: 18px; }
+  .nation-group h3 {
+    margin: 0 0 8px 4px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px; font-weight: 700; letter-spacing: 0.04em;
+    color: var(--gold);
   }
-
-  h3 {
-    margin: 0 0 12px;
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
+  .nation-group h3 .meaning {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-3); margin-left: 8px;
   }
 
   .motif-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
   }
   .motif {
-    aspect-ratio: 1 / 1;
-    background: var(--panel-2);
-    border: 1px solid transparent;
-    border-radius: 6px;
-    cursor: grab;
-    display: grid;
-    place-items: center;
-    transition: border-color .15s, transform .15s;
-    padding: 6px;
-  }
-  .motif:hover { border-color: var(--accent); transform: translateY(-1px); }
-  .motif svg { width: 100%; height: 100%; }
-  .motif.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,151,90,.25); }
-
-  .body-parts {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-    margin-bottom: 16px;
-  }
-  .body-parts button {
-    background: var(--panel-2);
-    color: var(--ink);
+    aspect-ratio: 1;
+    background: linear-gradient(180deg, var(--bg-2), #0e1424);
     border: 1px solid var(--line);
+    border-radius: var(--radius-md);
     padding: 10px;
-    font-size: 12px;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
     cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
   }
-  .body-parts button.active {
-    border-color: var(--accent);
-    color: var(--accent);
+  .motif:hover { border-color: var(--gold-soft); transform: translateY(-1px); }
+  .motif.active { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(216, 178, 124, 0.2); }
+  .motif svg { width: 100%; height: 100%; color: var(--ink); }
+  .motif .tip {
+    position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: var(--ink-3);
+    white-space: nowrap;
+    opacity: 0; transition: opacity 0.15s ease;
+    pointer-events: none;
+  }
+  .motif:hover .tip { opacity: 1; }
+
+  .left .hint {
+    padding: 0 18px 16px;
+    font-size: 11px; color: var(--ink-3); line-height: 1.5;
   }
 
-  .ai-box {
-    margin-top: 18px;
-    border: 1px dashed var(--line);
-    border-radius: 6px;
-    padding: 12px;
+  /* -------------------------------------------------------------- stage */
+  .stage {
+    grid-area: stage;
+    position: relative;
+    background:
+      radial-gradient(800px 500px at 50% 60%, rgba(42, 111, 156, 0.22), transparent 70%),
+      radial-gradient(400px 300px at 50% 30%, rgba(216, 178, 124, 0.07), transparent 70%),
+      var(--bg-0);
+    overflow: hidden;
   }
-  .ai-box.locked { opacity: .55; }
-  .ai-box label { font-size: 11px; color: var(--muted); display:block; margin-bottom: 6px; letter-spacing: .12em; text-transform: uppercase; }
-  .ai-box textarea {
-    width: 100%;
-    min-height: 64px;
-    background: #0c0a07;
-    color: var(--ink);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 8px;
-    font-family: inherit;
-    font-size: 13px;
-    resize: vertical;
-  }
-  .ai-box button {
-    margin-top: 8px;
-    width: 100%;
-    background: var(--accent);
-    color: #1b1207;
-    border: 0;
-    padding: 10px;
-    border-radius: 4px;
-    font-weight: 600;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    font-size: 12px;
-  }
-  .ai-box button:disabled { background: #3a3128; color: var(--muted); cursor: not-allowed; }
-
-  .slider-row { margin-top: 12px; }
-  .slider-row label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 4px; }
-  .slider-row input[type=range] { width: 100%; accent-color: var(--accent); }
-
-  .hint {
-    position: absolute;
-    bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 11px;
-    letter-spacing: .15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    background: rgba(14,12,10,.6);
-    padding: 6px 12px;
-    border-radius: 999px;
-    backdrop-filter: blur(4px);
+  #c { width: 100%; height: 100%; display: block; }
+  .stage-hint {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    background: rgba(6, 9, 18, 0.65); border: 1px solid var(--line);
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+    backdrop-filter: blur(6px);
     pointer-events: none;
   }
 
-  .modal-bg {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.7);
-    display: none;
-    align-items: center; justify-content: center;
-    z-index: 50;
+  /* -------------------------------------------------------------- right rail */
+  .right {
+    grid-area: right;
+    border-left: 1px solid var(--line);
+    background: var(--bg-1);
+    overflow-y: auto;
+    padding: 18px 18px 24px;
   }
-  .modal-bg.open { display: flex; }
+  .right::-webkit-scrollbar { width: 8px; }
+  .right::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; }
+
+  .panel-title {
+    margin: 0 0 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .region-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    margin-bottom: 18px;
+  }
+  .region-btn {
+    border: 1px solid var(--line-strong); background: var(--bg-2);
+    padding: 10px; border-radius: var(--radius-md);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-2);
+    transition: all 0.15s ease;
+  }
+  .region-btn:hover { border-color: var(--gold-soft); color: var(--gold); }
+  .region-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(216, 178, 124, 0.08); }
+
+  .slider-row { margin-bottom: 14px; }
+  .slider-row .lbl {
+    display: flex; justify-content: space-between;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 6px;
+  }
+  .slider-row .val { color: var(--ink-2); }
+  input[type=range] {
+    width: 100%; appearance: none; background: var(--bg-2);
+    height: 6px; border-radius: 999px; outline: none; border: 1px solid var(--line);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--gold); cursor: pointer;
+    box-shadow: 0 0 0 4px rgba(216, 178, 124, 0.18);
+  }
+
+  .ai-card {
+    margin-top: 18px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: linear-gradient(180deg, rgba(42, 111, 156, 0.08), transparent);
+  }
+  .ai-card.locked { opacity: 0.5; }
+  .ai-card textarea {
+    width: 100%; resize: vertical; min-height: 64px; max-height: 140px;
+    background: var(--bg-0); color: var(--ink);
+    border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+    padding: 10px; font: inherit; font-size: 13px;
+    margin-bottom: 10px;
+  }
+  .ai-card textarea:focus { outline: 2px solid var(--gold-soft); border-color: var(--gold); }
+  .ai-card textarea::placeholder { color: var(--ink-3); }
+  .ai-card button.gen {
+    width: 100%;
+    border: 0;
+    background: linear-gradient(180deg, var(--gold), var(--gold-soft));
+    color: #1a1108;
+    padding: 12px; border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    transition: all 0.18s ease;
+  }
+  .ai-card button.gen:hover { transform: translateY(-1px); box-shadow: 0 8px 20px -8px rgba(216, 178, 124, 0.5); }
+  .ai-card button.gen:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .ai-card.locked button.gen { background: var(--bg-2); color: var(--ink-3); }
+
+  .right .actions {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;
+  }
+  .right .actions button {
+    border: 1px solid var(--line-strong); background: var(--bg-2);
+    padding: 10px; border-radius: var(--radius-sm);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-2);
+    transition: all 0.15s ease;
+  }
+  .right .actions button:hover { border-color: var(--gold-soft); color: var(--gold); }
+  .right .actions button.primary { background: var(--gold); color: #1a1108; border-color: var(--gold); }
+
+  /* -------------------------------------------------------------- status */
+  .status {
+    grid-area: status;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 18px;
+    border-top: 1px solid var(--line);
+    background: rgba(6, 9, 18, 0.7);
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .status .right-status { color: var(--ink-2); }
+
+  /* -------------------------------------------------------------- modal */
+  .modal-back {
+    position: fixed; inset: 0; background: rgba(6, 9, 18, 0.78); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-back.open { display: flex; }
   .modal {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 24px;
-    max-width: 420px;
-    text-align: center;
+    width: min(440px, 92vw);
+    background: var(--bg-1); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+    padding: 32px; text-align: center;
+    box-shadow: var(--shadow-lg);
   }
-  .modal h2 { margin: 0 0 8px; }
-  .modal p { color: var(--muted); margin: 0 0 18px; font-size: 14px; line-height: 1.5; }
-  .modal .row { display: flex; gap: 8px; }
-  .modal button { flex: 1; padding: 12px; border-radius: 4px; border: 0; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; }
-  .modal .primary { background: var(--accent); color: #1b1207; }
-  .modal .ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+  .modal h3 {
+    margin: 0 0 8px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px; color: var(--gold);
+  }
+  .modal p {
+    margin: 0 0 20px; color: var(--ink-2); line-height: 1.55; font-size: 14px;
+  }
+  .modal .price { color: var(--gold); font-weight: 700; }
+  .modal .row { display: flex; gap: 10px; justify-content: center; }
+  .modal .row button {
+    border: 0; padding: 12px 22px; border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .modal .row .later { background: transparent; border: 1px solid var(--line-strong); color: var(--ink-2); }
+  .modal .row .pay {
+    background: linear-gradient(180deg, var(--gold), var(--gold-soft));
+    color: #1a1108;
+  }
+  .modal .small { margin-top: 16px; font-size: 11px; color: var(--ink-3); }
+
+  /* -------------------------------------------------------------- generate spinner */
+  .generating {
+    position: absolute; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(6, 9, 18, 0.6); backdrop-filter: blur(6px);
+    z-index: 5;
+  }
+  .generating.on { display: flex; }
+  .generating .pill {
+    background: var(--bg-1); border: 1px solid var(--line-strong);
+    padding: 14px 22px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 12px;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .generating .pill::before {
+    content: ''; width: 14px; height: 14px;
+    border: 2px solid var(--gold); border-right-color: transparent;
+    border-radius: 50%; animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
 <div class="app">
-  <header>
-    <div class="brand">PACIFIK <span>ELEMENTS</span> — Design Builder</div>
-    <button id="unlockBtn" class="pill locked">🔒 Unlock AI Generate</button>
+
+  <!-- ============== HEADER ============== -->
+  <header class="header">
+    <div class="brand">
+      PACIFIK <span class="accent">ELEMENTS</span>
+      <span class="sep">—</span>
+      <span class="sub">Design Builder</span>
+    </div>
+    <div class="grow"></div>
+
+    <button class="mobile-motifs-btn" id="mobileMotifs">Motifs</button>
+
+    <div class="gender-toggle" id="genderToggle">
+      <button data-g="male"   class="active">Male</button>
+      <button data-g="female">Female</button>
+    </div>
+
+    <button class="unlock" id="unlockBtn">
+      <span id="unlockIcon">🔒</span>
+      <span id="unlockText">Unlock AI Generate</span>
+    </button>
   </header>
 
-  <aside class="library">
-    <h3>Motif Library</h3>
-    <div id="motifGrid" class="motif-grid"></div>
-    <p style="font-size:11px;color:var(--muted);line-height:1.5;margin-top:14px;">
-      Drag a motif onto the mannequin, or click to apply to the selected body part.
-    </p>
+  <!-- ============== LEFT RAIL ============== -->
+  <aside class="left" id="leftRail">
+    <h2>Motif Library</h2>
+    <div class="nation-tabs" id="nationTabs"></div>
+    <div class="motif-scroll" id="motifScroll"></div>
+    <div class="hint">Tap a motif to apply it to the selected body region. Drag the figure to rotate.</div>
   </aside>
 
+  <!-- ============== STAGE ============== -->
   <main class="stage">
-    <canvas id="three"></canvas>
-    <div class="hint">drag to rotate · scroll to zoom</div>
+    <canvas id="c"></canvas>
+    <div class="stage-hint">Drag to rotate · Scroll to zoom</div>
+    <div class="generating" id="genOverlay">
+      <div class="pill">Crafting your design</div>
+    </div>
   </main>
 
-  <aside class="controls">
-    <h3>Body Region</h3>
-    <div class="body-parts" id="bodyParts">
-      <button data-part="chest" class="active">Chest</button>
-      <button data-part="leftArm">Left Arm</button>
-      <button data-part="rightArm">Right Arm</button>
-      <button data-part="back">Back</button>
-      <button data-part="leftLeg">Left Leg</button>
-      <button data-part="rightLeg">Right Leg</button>
+  <!-- ============== RIGHT RAIL ============== -->
+  <aside class="right">
+    <h2 class="panel-title">Body Region</h2>
+    <div class="region-grid" id="regionGrid">
+      <button class="region-btn active" data-r="chest">Chest</button>
+      <button class="region-btn" data-r="leftArm">Left Arm</button>
+      <button class="region-btn" data-r="rightArm">Right Arm</button>
+      <button class="region-btn" data-r="back">Back</button>
+      <button class="region-btn" data-r="leftLeg">Left Leg</button>
+      <button class="region-btn" data-r="rightLeg">Right Leg</button>
     </div>
 
     <div class="slider-row">
-      <label>Scale <span id="scaleVal">1.0×</span></label>
-      <input type="range" id="scale" min="0.3" max="2" step="0.05" value="1" />
+      <div class="lbl"><span>Scale</span><span class="val" id="scaleVal">1.00×</span></div>
+      <input id="scale" type="range" min="0.4" max="2.2" step="0.01" value="1" />
     </div>
     <div class="slider-row">
-      <label>Rotation <span id="rotVal">0°</span></label>
-      <input type="range" id="rot" min="-180" max="180" step="1" value="0" />
+      <div class="lbl"><span>Rotation</span><span class="val" id="rotVal">0°</span></div>
+      <input id="rot" type="range" min="-180" max="180" step="1" value="0" />
     </div>
     <div class="slider-row">
-      <label>Offset X <span id="xVal">0</span></label>
-      <input type="range" id="offX" min="-0.5" max="0.5" step="0.01" value="0" />
+      <div class="lbl"><span>Offset X</span><span class="val" id="oxVal">0.00</span></div>
+      <input id="ox" type="range" min="-0.5" max="0.5" step="0.01" value="0" />
     </div>
     <div class="slider-row">
-      <label>Offset Y <span id="yVal">0</span></label>
-      <input type="range" id="offY" min="-0.5" max="0.5" step="0.01" value="0" />
+      <div class="lbl"><span>Offset Y</span><span class="val" id="oyVal">0.00</span></div>
+      <input id="oy" type="range" min="-0.5" max="0.5" step="0.01" value="0" />
     </div>
 
-    <div class="ai-box locked" id="aiBox">
-      <label>AI Generate (locked)</label>
-      <textarea id="aiPrompt" placeholder="e.g. shark teeth + ocean waves, bold lines, half-sleeve"></textarea>
-      <button id="aiGenBtn" disabled>Generate Design</button>
+    <div class="ai-card locked" id="aiCard">
+      <h2 class="panel-title" style="margin: 0 0 8px;">
+        <span id="aiCardTitle">AI Generate (Locked)</span>
+      </h2>
+      <textarea id="aiPrompt" placeholder="e.g. shark teeth + ocean waves, half sleeve, bold lines"></textarea>
+      <button id="genBtn" class="gen" disabled>Generate Design</button>
     </div>
 
-    <div style="margin-top:18px; display:flex; gap:8px;">
-      <button id="clearBtn" class="pill" style="flex:1; background:transparent; color:var(--ink); border:1px solid var(--line);">Clear</button>
-      <button id="saveBtn" class="pill" style="flex:1;">Save Look</button>
+    <div class="actions">
+      <button id="clearBtn">Clear</button>
+      <button id="saveBtn" class="primary">Save Look</button>
     </div>
   </aside>
 
-  <footer>
-    <span>Pacifik Elements · Polynesian Tattoo Preview</span>
-    <span id="status">Ready</span>
+  <!-- ============== STATUS BAR ============== -->
+  <footer class="status">
+    <div>Pacifik Elements · Polynesian Tattoo Preview</div>
+    <div class="right-status" id="status">Ready</div>
   </footer>
+
 </div>
 
-<div class="modal-bg" id="paywall">
+<!-- ============== PAYWALL MODAL ============== -->
+<div class="modal-back" id="modalBack">
   <div class="modal">
-    <h2 style="color:var(--accent);">Unlock AI Design Pass</h2>
-    <p>Get unlimited AI-generated Polynesian designs on your live 3D mannequin for 24 hours. <strong>$7.99</strong></p>
+    <h3>Unlock AI Design Pass</h3>
+    <p>Get unlimited AI-generated Polynesian designs on your live 3D figure for 24 hours. <span class="price">$7.99</span></p>
     <div class="row">
-      <button class="ghost" onclick="document.getElementById('paywall').classList.remove('open')">Maybe later</button>
-      <button class="primary" id="payBtn">Unlock for $7.99</button>
+      <button class="later" id="laterBtn">Maybe Later</button>
+      <button class="pay" id="payBtn">Unlock for $7.99</button>
     </div>
-    <p style="margin-top:14px;font-size:11px;">In production this opens Shopify Checkout. For now, click Unlock to demo the flow.</p>
+    <div class="small">In production this opens Shopify Checkout. For now, click Unlock to demo the flow.</div>
   </div>
 </div>
 
@@ -322,475 +505,1295 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// ---------- Polynesian motif library (procedural SVG) ----------
-const motifs = [
-  { id: 'sharkTeeth',   name: 'Shark Teeth',   svg: makeSharkTeeth() },
-  { id: 'oceanWaves',   name: 'Ocean Waves',   svg: makeWaves() },
-  { id: 'sunBurst',     name: 'Sun Burst',     svg: makeSunBurst() },
-  { id: 'tikiFace',     name: 'Tiki Face',     svg: makeTiki() },
-  { id: 'spearheads',   name: 'Spearheads',    svg: makeSpearheads() },
-  { id: 'turtleShell',  name: 'Turtle Shell',  svg: makeTurtle() },
-  { id: 'enata',        name: 'Enata',         svg: makeEnata() },
-  { id: 'frigateBird',  name: 'Frigate Bird',  svg: makeFrigate() },
+/* =================================================================
+   1. MOTIF LIBRARY — organised by Polynesian nation
+   ================================================================= */
+// Each motif is hand-authored as flat black SVG. The geometry is informed by
+// traditional patterns from each nation, and each one is annotated with its
+// cultural meaning so customers can pick something that resonates.
+//
+// `paint(g)` draws the motif into a 2D canvas context. We render at high res
+// (1024×1024) so the texture stays crisp on the 3D mesh.
+
+const COLOR_INK = '#0c1018';
+
+function fillStrokeBlack(ctx) { ctx.fillStyle = '#000'; ctx.strokeStyle = '#000'; ctx.lineWidth = 8; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; }
+
+const MOTIFS = [
+
+/* ------------------ SAMOA ------------------ */
+{
+  id: 'sam-niho-mano', nation: 'Samoa', name: 'Niho Mano', meaning: 'Shark teeth — strength & guidance',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const rows = 3, cols = 9;
+    for (let r = 0; r < rows; r++) {
+      const y = h * 0.18 + r * h * 0.22;
+      for (let c = 0; c < cols; c++) {
+        const x = w * (0.08 + c * 0.105);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + w * 0.052, y + h * 0.18);
+        ctx.lineTo(x - w * 0.052, y + h * 0.18);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+  }
+},
+{
+  id: 'sam-vaa', nation: 'Samoa', name: "Va'a", meaning: 'Canoe — journey & navigation',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cy = h * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.08, cy);
+    ctx.quadraticCurveTo(w * 0.5, cy - h * 0.18, w * 0.92, cy);
+    ctx.quadraticCurveTo(w * 0.5, cy + h * 0.06, w * 0.08, cy);
+    ctx.fill();
+    // Sail mast and sail lines
+    ctx.lineWidth = 14;
+    ctx.beginPath(); ctx.moveTo(w * 0.5, cy - h * 0.06); ctx.lineTo(w * 0.5, cy - h * 0.42); ctx.stroke();
+    for (let i = 0; i < 4; i++) {
+      const yy = cy - h * 0.40 + i * h * 0.085;
+      ctx.beginPath(); ctx.moveTo(w * 0.32, yy); ctx.lineTo(w * 0.68, yy); ctx.stroke();
+    }
+  }
+},
+{
+  id: 'sam-spearheads', nation: 'Samoa', name: 'Tao', meaning: 'Spearheads — courage & defense',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    for (let i = 0; i < 5; i++) {
+      const x = w * (0.15 + i * 0.175);
+      ctx.beginPath();
+      ctx.moveTo(x, h * 0.1);
+      ctx.lineTo(x + w * 0.07, h * 0.9);
+      ctx.lineTo(x - w * 0.07, h * 0.9);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+},
+{
+  id: 'sam-gogo', nation: 'Samoa', name: 'Gogo', meaning: 'Frigate bird — freedom & travel',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.42, cy + h * 0.05);
+    ctx.quadraticCurveTo(cx - w * 0.18, cy - h * 0.32, cx, cy - h * 0.04);
+    ctx.quadraticCurveTo(cx + w * 0.18, cy - h * 0.32, cx + w * 0.42, cy + h * 0.05);
+    ctx.lineTo(cx + w * 0.18, cy + h * 0.04);
+    ctx.lineTo(cx, cy + h * 0.18);
+    ctx.lineTo(cx - w * 0.18, cy + h * 0.04);
+    ctx.closePath();
+    ctx.fill();
+  }
+},
+{
+  id: 'sam-malu', nation: 'Samoa', name: 'Malu', meaning: 'Female protective tattoo motif',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5;
+    // Diamond grid
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 5; c++) {
+        const x = w * 0.18 + c * w * 0.16;
+        const y = h * 0.18 + r * h * 0.18;
+        ctx.beginPath();
+        ctx.moveTo(x, y - h * 0.06);
+        ctx.lineTo(x + w * 0.05, y);
+        ctx.lineTo(x, y + h * 0.06);
+        ctx.lineTo(x - w * 0.05, y);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+  }
+},
+{
+  id: 'sam-sun', nation: 'Samoa', name: "La'a", meaning: 'Sun — leadership & life force',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5, r = w * 0.18;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2;
+      const x1 = cx + Math.cos(a) * r * 1.18;
+      const y1 = cy + Math.sin(a) * r * 1.18;
+      const x2 = cx + Math.cos(a) * r * 2.1;
+      const y2 = cy + Math.sin(a) * r * 2.1;
+      ctx.lineWidth = 18;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    }
+  }
+},
+
+/* ------------------ MAORI ------------------ */
+{
+  id: 'mao-koru', nation: 'Maori', name: 'Koru', meaning: 'Unfurling fern — new life',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 28;
+    const cx = w * 0.5, cy = h * 0.55;
+    ctx.beginPath();
+    for (let t = 0; t < 6.5; t += 0.06) {
+      const r = t * 36;
+      const x = cx + Math.cos(t) * r;
+      const y = cy + Math.sin(t) * r;
+      if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // Bulb at center
+    ctx.beginPath(); ctx.arc(cx, cy, 22, 0, Math.PI * 2); ctx.fill();
+  }
+},
+{
+  id: 'mao-pikorua', nation: 'Maori', name: 'Pikorua', meaning: 'Twist — eternal bond',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 30;
+    const cx = w * 0.5;
+    // Two interlocking S curves
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.28, h * 0.18);
+    ctx.bezierCurveTo(cx + w * 0.18, h * 0.32, cx - w * 0.18, h * 0.68, cx + w * 0.28, h * 0.82);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + w * 0.28, h * 0.18);
+    ctx.bezierCurveTo(cx - w * 0.18, h * 0.32, cx + w * 0.18, h * 0.68, cx - w * 0.28, h * 0.82);
+    ctx.stroke();
+  }
+},
+{
+  id: 'mao-hei-matau', nation: 'Maori', name: 'Hei Matau', meaning: 'Fish hook — abundance & safe travel',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 38;
+    const cx = w * 0.5, cy = h * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, h * 0.12);
+    ctx.lineTo(cx, h * 0.5);
+    ctx.arc(cx - w * 0.18, h * 0.5, w * 0.18, 0, Math.PI, false);
+    ctx.lineTo(cx - w * 0.36, h * 0.32);
+    ctx.stroke();
+  }
+},
+{
+  id: 'mao-manaia', nation: 'Maori', name: 'Manaia', meaning: 'Spiritual guardian',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    // Stylised guardian figure
+    ctx.beginPath();
+    ctx.arc(cx, h * 0.28, w * 0.13, 0, Math.PI * 2);
+    ctx.fill();
+    // body curves
+    ctx.lineWidth = 26;
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.05, h * 0.4);
+    ctx.bezierCurveTo(cx - w * 0.32, h * 0.55, cx - w * 0.32, h * 0.78, cx, h * 0.88);
+    ctx.bezierCurveTo(cx + w * 0.32, h * 0.78, cx + w * 0.32, h * 0.55, cx + w * 0.05, h * 0.4);
+    ctx.stroke();
+    // eyes
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx - w * 0.05, h * 0.26, w * 0.025, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + w * 0.05, h * 0.26, w * 0.025, 0, Math.PI * 2); ctx.fill();
+  }
+},
+{
+  id: 'mao-mangopare', nation: 'Maori', name: 'Mangopare', meaning: 'Hammerhead shark — strength & determination',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 26;
+    const cx = w * 0.5, cy = h * 0.5;
+    // Two opposing curls
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.42, cy);
+    ctx.bezierCurveTo(cx - w * 0.42, cy - h * 0.35, cx - w * 0.05, cy - h * 0.35, cx - w * 0.05, cy);
+    ctx.bezierCurveTo(cx - w * 0.05, cy + h * 0.18, cx - w * 0.25, cy + h * 0.18, cx - w * 0.25, cy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + w * 0.42, cy);
+    ctx.bezierCurveTo(cx + w * 0.42, cy + h * 0.35, cx + w * 0.05, cy + h * 0.35, cx + w * 0.05, cy);
+    ctx.bezierCurveTo(cx + w * 0.05, cy - h * 0.18, cx + w * 0.25, cy - h * 0.18, cx + w * 0.25, cy);
+    ctx.stroke();
+  }
+},
+{
+  id: 'mao-unaunahi', nation: 'Maori', name: 'Unaunahi', meaning: 'Fish scales — abundance & health',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 12;
+    const r = w * 0.085;
+    for (let row = 0; row < 7; row++) {
+      const offset = (row % 2) * r;
+      for (let col = 0; col < 7; col++) {
+        const x = w * 0.08 + col * r * 2 + offset;
+        const y = h * 0.1 + row * r * 1.5;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI, false);
+        ctx.stroke();
+      }
+    }
+  }
+},
+
+/* ------------------ HAWAII ------------------ */
+{
+  id: 'haw-nalu', nation: 'Hawaii', name: 'Nalu', meaning: 'Ocean waves — change & resilience',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 24; ctx.lineCap = 'round';
+    for (let r = 0; r < 5; r++) {
+      const y = h * 0.18 + r * h * 0.16;
+      ctx.beginPath();
+      for (let x = w * 0.06; x <= w * 0.94; x += 4) {
+        const yy = y + Math.sin(x * 0.018 + r) * 14;
+        if (x === w * 0.06) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
+      }
+      ctx.stroke();
+    }
+  }
+},
+{
+  id: 'haw-honu', nation: 'Hawaii', name: 'Honu', meaning: 'Sea turtle — long life & navigator',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    // shell
+    ctx.beginPath(); ctx.ellipse(cx, cy, w * 0.32, h * 0.22, 0, 0, Math.PI * 2); ctx.fill();
+    // head
+    ctx.beginPath(); ctx.ellipse(cx, cy - h * 0.32, w * 0.09, h * 0.07, 0, 0, Math.PI * 2); ctx.fill();
+    // limbs
+    for (const dx of [-1, 1]) {
+      ctx.beginPath();
+      ctx.ellipse(cx + dx * w * 0.32, cy - h * 0.16, w * 0.12, h * 0.07, dx * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(cx + dx * w * 0.32, cy + h * 0.16, w * 0.12, h * 0.07, -dx * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // shell pattern
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2;
+      const x = cx + Math.cos(a) * w * 0.15;
+      const y = cy + Math.sin(a) * h * 0.1;
+      ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+},
+{
+  id: 'haw-niho-mano', nation: 'Hawaii', name: 'Niho Mano', meaning: 'Shark teeth — protection',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    // single staggered band
+    for (let r = 0; r < 2; r++) {
+      const y = h * 0.32 + r * h * 0.28;
+      const flip = r % 2;
+      for (let c = 0; c < 8; c++) {
+        const x = w * (0.1 + c * 0.115);
+        ctx.beginPath();
+        if (flip) {
+          ctx.moveTo(x, y + h * 0.22);
+          ctx.lineTo(x + w * 0.058, y);
+          ctx.lineTo(x - w * 0.058, y);
+        } else {
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + w * 0.058, y + h * 0.22);
+          ctx.lineTo(x - w * 0.058, y + h * 0.22);
+        }
+        ctx.closePath(); ctx.fill();
+      }
+    }
+  }
+},
+{
+  id: 'haw-kapa', nation: 'Hawaii', name: 'Kapa', meaning: 'Bark cloth pattern — heritage',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 8;
+    for (let i = 0; i < 8; i++) {
+      const y = h * (0.06 + i * 0.12);
+      ctx.beginPath(); ctx.moveTo(w * 0.06, y); ctx.lineTo(w * 0.94, y); ctx.stroke();
+    }
+    for (let i = 0; i < 8; i++) {
+      const x = w * (0.06 + i * 0.125);
+      for (let j = 0; j < 8; j++) {
+        const y = h * (0.12 + j * 0.12);
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+},
+{
+  id: 'haw-plumeria', nation: 'Hawaii', name: 'Plumeria', meaning: 'Aloha & new beginnings',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+      const px = cx + Math.cos(a) * w * 0.18;
+      const py = cy + Math.sin(a) * h * 0.18;
+      ctx.beginPath();
+      ctx.ellipse(px, py, w * 0.12, h * 0.08, a, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx, cy, w * 0.07, 0, Math.PI * 2); ctx.fill();
+  }
+},
+
+/* ------------------ TONGA ------------------ */
+{
+  id: 'ton-manulua', nation: 'Tonga', name: 'Manulua', meaning: 'Two birds — partnership & unity',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    // four diamonds in a cross
+    for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+      const x = cx + dx * w * 0.22;
+      const y = cy + dy * h * 0.22;
+      ctx.beginPath();
+      ctx.moveTo(x, y - h * 0.12);
+      ctx.lineTo(x + w * 0.1, y);
+      ctx.lineTo(x, y + h * 0.12);
+      ctx.lineTo(x - w * 0.1, y);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // center diamond
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - h * 0.08);
+    ctx.lineTo(cx + w * 0.07, cy);
+    ctx.lineTo(cx, cy + h * 0.08);
+    ctx.lineTo(cx - w * 0.07, cy);
+    ctx.closePath(); ctx.fill();
+  }
+},
+{
+  id: 'ton-lalava', nation: 'Tonga', name: 'Lalava', meaning: 'Sennit lashing — connection',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 14;
+    for (let i = -2; i < 8; i++) {
+      ctx.beginPath();
+      ctx.moveTo(w * 0.06, h * (0.1 + i * 0.12));
+      ctx.lineTo(w * 0.94, h * (0.1 + (i + 2) * 0.12));
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(w * 0.06, h * (0.1 + (i + 2) * 0.12));
+      ctx.lineTo(w * 0.94, h * (0.1 + i * 0.12));
+      ctx.stroke();
+    }
+  }
+},
+{
+  id: 'ton-kupesi', nation: 'Tonga', name: 'Kupesi', meaning: 'Geometric tapa motif',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 10;
+    const r = w * 0.13;
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        const x = w * 0.14 + col * w * 0.24;
+        const y = h * 0.14 + row * h * 0.24;
+        ctx.beginPath();
+        ctx.rect(x - r * 0.7, y - r * 0.7, r * 1.4, r * 1.4);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x - r * 0.7, y - r * 0.7);
+        ctx.lineTo(x + r * 0.7, y + r * 0.7);
+        ctx.moveTo(x + r * 0.7, y - r * 0.7);
+        ctx.lineTo(x - r * 0.7, y + r * 0.7);
+        ctx.stroke();
+      }
+    }
+  }
+},
+{
+  id: 'ton-fata', nation: 'Tonga', name: 'Fata', meaning: 'Stilts pattern — elevation',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 22;
+    for (let i = 0; i < 7; i++) {
+      const x = w * (0.08 + i * 0.135);
+      ctx.beginPath();
+      ctx.moveTo(x, h * 0.1);
+      ctx.lineTo(x, h * 0.78);
+      ctx.stroke();
+      // crossbars
+      if (i < 6) {
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(x + 4, h * 0.5);
+        ctx.lineTo(x + w * 0.135 - 4, h * 0.5);
+        ctx.stroke();
+        ctx.lineWidth = 22;
+      }
+    }
+  }
+},
+
+/* ------------------ MARQUESAS ------------------ */
+{
+  id: 'mar-enata', nation: 'Marquesas', name: 'Enata', meaning: 'Human figures — community & ancestors',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cnt = 5;
+    const cy = h * 0.5;
+    for (let i = 0; i < cnt; i++) {
+      const cx = w * (0.12 + i * 0.18);
+      // head
+      ctx.beginPath(); ctx.arc(cx, cy - h * 0.22, w * 0.04, 0, Math.PI * 2); ctx.fill();
+      // body
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - h * 0.16);
+      ctx.lineTo(cx, cy + h * 0.06);
+      ctx.lineWidth = 16; ctx.stroke();
+      // arms (linked)
+      ctx.lineWidth = 14;
+      ctx.beginPath();
+      ctx.moveTo(cx - w * 0.06, cy - h * 0.07);
+      ctx.lineTo(cx + w * 0.06, cy - h * 0.07);
+      ctx.stroke();
+      // legs
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + h * 0.06);
+      ctx.lineTo(cx - w * 0.04, cy + h * 0.22);
+      ctx.moveTo(cx, cy + h * 0.06);
+      ctx.lineTo(cx + w * 0.04, cy + h * 0.22);
+      ctx.stroke();
+    }
+  }
+},
+{
+  id: 'mar-tiki', nation: 'Marquesas', name: 'Tiki', meaning: 'Ancestor face — protector',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    // face outline
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.3, cy - h * 0.34);
+    ctx.lineTo(cx + w * 0.3, cy - h * 0.34);
+    ctx.lineTo(cx + w * 0.36, cy + h * 0.34);
+    ctx.lineTo(cx - w * 0.36, cy + h * 0.34);
+    ctx.closePath();
+    ctx.fill();
+    // eyes
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.ellipse(cx - w * 0.13, cy - h * 0.12, w * 0.07, h * 0.06, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + w * 0.13, cy - h * 0.12, w * 0.07, h * 0.06, 0, 0, Math.PI * 2); ctx.fill();
+    // pupils
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(cx - w * 0.13, cy - h * 0.12, w * 0.022, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + w * 0.13, cy - h * 0.12, w * 0.022, 0, Math.PI * 2); ctx.fill();
+    // mouth
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.rect(cx - w * 0.16, cy + h * 0.05, w * 0.32, h * 0.12);
+    ctx.fill();
+    // teeth
+    ctx.fillStyle = '#000';
+    for (let i = 0; i < 6; i++) {
+      const x = cx - w * 0.14 + i * w * 0.06;
+      ctx.beginPath();
+      ctx.moveTo(x, cy + h * 0.05);
+      ctx.lineTo(x + w * 0.025, cy + h * 0.17);
+      ctx.lineTo(x - w * 0.025, cy + h * 0.17);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+},
+{
+  id: 'mar-cross', nation: 'Marquesas', name: 'Marquesan Cross', meaning: 'Balance & harmony',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.06, cy - h * 0.32);
+    ctx.lineTo(cx + w * 0.06, cy - h * 0.32);
+    ctx.lineTo(cx + w * 0.06, cy - h * 0.06);
+    ctx.lineTo(cx + w * 0.32, cy - h * 0.06);
+    ctx.lineTo(cx + w * 0.32, cy + h * 0.06);
+    ctx.lineTo(cx + w * 0.06, cy + h * 0.06);
+    ctx.lineTo(cx + w * 0.06, cy + h * 0.32);
+    ctx.lineTo(cx - w * 0.06, cy + h * 0.32);
+    ctx.lineTo(cx - w * 0.06, cy + h * 0.06);
+    ctx.lineTo(cx - w * 0.32, cy + h * 0.06);
+    ctx.lineTo(cx - w * 0.32, cy - h * 0.06);
+    ctx.lineTo(cx - w * 0.06, cy - h * 0.06);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx, cy, w * 0.045, 0, Math.PI * 2); ctx.fill();
+  }
+},
+{
+  id: 'mar-mata', nation: 'Marquesas', name: 'Mata Hoata', meaning: 'Ancestor eyes — watchful protection',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    for (let row = 0; row < 3; row++) {
+      const y = h * 0.22 + row * h * 0.28;
+      for (let col = 0; col < 2; col++) {
+        const x = cx + (col === 0 ? -1 : 1) * w * 0.18;
+        ctx.beginPath();
+        ctx.ellipse(x, y, w * 0.13, h * 0.07, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(x, y, w * 0.045, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(x, y, w * 0.018, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+},
+{
+  id: 'mar-ipu', nation: 'Marquesas', name: 'Ipu', meaning: 'Gourd — abundance',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    for (let i = 0; i < 4; i++) {
+      const offset = (i % 2) * w * 0.22;
+      for (let j = 0; j < 3; j++) {
+        const x = w * 0.16 + offset + j * w * 0.22;
+        const y = h * 0.16 + i * h * 0.22;
+        ctx.beginPath();
+        ctx.ellipse(x, y, w * 0.08, h * 0.09, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.ellipse(x, y - h * 0.02, w * 0.025, h * 0.025, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+      }
+    }
+  }
+},
+
+/* ------------------ TAHITI ------------------ */
+{
+  id: 'tah-tiare', nation: 'Tahiti', name: 'Tiare', meaning: 'National flower — purity & love',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    for (let i = 0; i < 7; i++) {
+      const a = (i / 7) * Math.PI * 2;
+      const px = cx + Math.cos(a) * w * 0.18;
+      const py = cy + Math.sin(a) * h * 0.18;
+      ctx.beginPath();
+      ctx.ellipse(px, py, w * 0.14, h * 0.07, a, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(cx, cy, w * 0.06, 0, Math.PI * 2); ctx.fill();
+  }
+},
+{
+  id: 'tah-paoa', nation: 'Tahiti', name: "Pa'oa", meaning: 'Priest figure — wisdom',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.55;
+    // head
+    ctx.beginPath(); ctx.arc(cx, cy - h * 0.32, w * 0.08, 0, Math.PI * 2); ctx.fill();
+    // body
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.16, cy - h * 0.18);
+    ctx.lineTo(cx + w * 0.16, cy - h * 0.18);
+    ctx.lineTo(cx + w * 0.22, cy + h * 0.32);
+    ctx.lineTo(cx - w * 0.22, cy + h * 0.32);
+    ctx.closePath(); ctx.fill();
+    // arms
+    ctx.lineWidth = 22;
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.16, cy - h * 0.12);
+    ctx.lineTo(cx - w * 0.32, cy + h * 0.06);
+    ctx.moveTo(cx + w * 0.16, cy - h * 0.12);
+    ctx.lineTo(cx + w * 0.32, cy + h * 0.06);
+    ctx.stroke();
+  }
+},
+{
+  id: 'tah-reef', nation: 'Tahiti', name: 'Reef', meaning: 'Coral reef — life & abundance',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 12;
+    for (let i = 0; i < 14; i++) {
+      const x = w * (0.05 + i * 0.07);
+      const tall = h * (0.18 + Math.sin(i * 0.7) * 0.15 + 0.12);
+      ctx.beginPath();
+      ctx.moveTo(x, h * 0.85);
+      ctx.lineTo(x, h * 0.85 - tall);
+      ctx.stroke();
+      // branches
+      ctx.beginPath();
+      ctx.moveTo(x, h * 0.85 - tall * 0.5);
+      ctx.lineTo(x + w * 0.025, h * 0.85 - tall * 0.7);
+      ctx.moveTo(x, h * 0.85 - tall * 0.5);
+      ctx.lineTo(x - w * 0.025, h * 0.85 - tall * 0.7);
+      ctx.stroke();
+    }
+  }
+},
+{
+  id: 'tah-maraamu', nation: 'Tahiti', name: "Mara'amu", meaning: 'South wind — change',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 18;
+    const cx = w * 0.5, cy = h * 0.5;
+    for (let i = 0; i < 4; i++) {
+      const a = i / 4 * Math.PI * 2;
+      ctx.beginPath();
+      const x1 = cx + Math.cos(a) * w * 0.08;
+      const y1 = cy + Math.sin(a) * w * 0.08;
+      const x2 = cx + Math.cos(a) * w * 0.36;
+      const y2 = cy + Math.sin(a) * w * 0.36;
+      ctx.moveTo(x1, y1);
+      // curl
+      const cx2 = cx + Math.cos(a + 0.4) * w * 0.5;
+      const cy2 = cy + Math.sin(a + 0.4) * w * 0.5;
+      ctx.quadraticCurveTo(cx2, cy2, x2, y2);
+      ctx.stroke();
+    }
+  }
+},
 ];
 
-function svgWrap(inner, vb='0 0 100 100') {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${inner}</svg>`;
-}
-function makeSharkTeeth(){
-  let p = '';
-  for (let i=0;i<6;i++){ const x = i*16+4; p += `<path d="M${x} 80 L${x+8} 30 L${x+16} 80 Z" fill="#f5efe4"/>`; }
-  return svgWrap(p);
-}
-function makeWaves(){
-  let p = '';
-  for (let r=0;r<3;r++){
-    p += `<path d="M0 ${30+r*20} Q 25 ${10+r*20} 50 ${30+r*20} T 100 ${30+r*20}" stroke="#f5efe4" stroke-width="3" fill="none"/>`;
-  }
-  return svgWrap(p);
-}
-function makeSunBurst(){
-  let p = `<circle cx="50" cy="50" r="14" fill="#f5efe4"/>`;
-  for (let i=0;i<12;i++){
-    const a = (i/12)*Math.PI*2;
-    const x1 = 50+Math.cos(a)*20, y1 = 50+Math.sin(a)*20;
-    const x2 = 50+Math.cos(a)*42, y2 = 50+Math.sin(a)*42;
-    p += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#f5efe4" stroke-width="4"/>`;
-  }
-  return svgWrap(p);
-}
-function makeTiki(){
-  return svgWrap(`
-    <path d="M30 10 H70 V30 Q70 45 60 50 Q70 60 70 75 Q70 90 50 92 Q30 90 30 75 Q30 60 40 50 Q30 45 30 30 Z" fill="#f5efe4"/>
-    <circle cx="42" cy="35" r="4" fill="#0e0c0a"/>
-    <circle cx="58" cy="35" r="4" fill="#0e0c0a"/>
-    <path d="M40 65 Q50 75 60 65" stroke="#0e0c0a" stroke-width="3" fill="none"/>
-  `);
-}
-function makeSpearheads(){
-  let p = '';
-  for (let i=0;i<4;i++){
-    const x = 12+i*24;
-    p += `<path d="M${x} 90 L${x+10} 10 L${x+20} 90 L${x+10} 70 Z" fill="#f5efe4"/>`;
-  }
-  return svgWrap(p);
-}
-function makeTurtle(){
-  return svgWrap(`
-    <ellipse cx="50" cy="50" rx="36" ry="28" fill="#f5efe4"/>
-    <path d="M30 50 Q50 30 70 50 Q50 70 30 50 Z" fill="#0e0c0a"/>
-    <circle cx="50" cy="50" r="4" fill="#f5efe4"/>
-    <circle cx="20" cy="50" r="6" fill="#f5efe4"/>
-    <circle cx="80" cy="50" r="6" fill="#f5efe4"/>
-    <circle cx="35" cy="22" r="6" fill="#f5efe4"/>
-    <circle cx="65" cy="22" r="6" fill="#f5efe4"/>
-    <circle cx="35" cy="78" r="6" fill="#f5efe4"/>
-    <circle cx="65" cy="78" r="6" fill="#f5efe4"/>
-  `);
-}
-function makeEnata(){
-  let p = '';
-  for (let i=0;i<4;i++){
-    const x = 12+i*24;
-    p += `<circle cx="${x+10}" cy="20" r="6" fill="#f5efe4"/>`;
-    p += `<path d="M${x+4} 30 L${x+16} 30 L${x+20} 70 L${x+10} 60 L${x} 70 Z" fill="#f5efe4"/>`;
-  }
-  return svgWrap(p);
-}
-function makeFrigate(){
-  return svgWrap(`
-    <path d="M10 50 Q30 20 50 50 Q70 20 90 50 Q70 35 50 60 Q30 35 10 50 Z" fill="#f5efe4"/>
-    <path d="M50 50 L50 70" stroke="#f5efe4" stroke-width="4"/>
-  `);
-}
+const NATIONS = ['All', 'Samoa', 'Maori', 'Hawaii', 'Tonga', 'Marquesas', 'Tahiti'];
 
-// ---------- Render motif library ----------
-const motifGrid = document.getElementById('motifGrid');
-let activeMotif = null;
-motifs.forEach(m => {
-  const div = document.createElement('div');
-  div.className = 'motif';
-  div.title = m.name;
-  div.dataset.id = m.id;
-  div.innerHTML = m.svg;
-  div.addEventListener('click', () => selectMotif(m, div));
-  motifGrid.appendChild(div);
-});
+/* =================================================================
+   2. THREE.JS — figure builder + tattoo texture system
+   ================================================================= */
 
-function selectMotif(m, el){
-  activeMotif = m;
-  document.querySelectorAll('.motif').forEach(n=>n.classList.remove('active'));
-  el?.classList.add('active');
-  applyToActivePart();
-  setStatus(`Applied: ${m.name}`);
-}
-
-// ---------- Three.js scene ----------
-const canvas = document.getElementById('three');
+const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-camera.position.set(0, 1.6, 5.5);
+camera.position.set(0, 1.4, 6.2);
 
 const controls = new OrbitControls(camera, canvas);
 controls.target.set(0, 1.4, 0);
 controls.enableDamping = true;
-controls.minDistance = 2.5;
+controls.dampingFactor = 0.08;
+controls.minPolarAngle = Math.PI * 0.2;
+controls.maxPolarAngle = Math.PI * 0.85;
+controls.minDistance = 3.5;
 controls.maxDistance = 9;
+controls.enablePan = false;
 
-// Lighting — warm key, cool rim, soft fill
-const key = new THREE.DirectionalLight(0xffe0b8, 1.4); key.position.set(2, 4, 3); scene.add(key);
-const rim = new THREE.DirectionalLight(0x6b8cff, 0.5); rim.position.set(-3, 2, -2); scene.add(rim);
-const fill = new THREE.HemisphereLight(0xfff0d8, 0x1a1208, 0.5); scene.add(fill);
+// Lighting — soft 3-point setup tuned for skin tones
+const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+scene.add(ambient);
+const key = new THREE.DirectionalLight(0xfff2dc, 1.0);
+key.position.set(3, 5, 4);
+scene.add(key);
+const fill = new THREE.DirectionalLight(0x6aa2c8, 0.5);
+fill.position.set(-3, 3, 2);
+scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffffff, 0.4);
+rim.position.set(0, 3, -4);
+scene.add(rim);
 
 // Floor disc
 const floor = new THREE.Mesh(
-  new THREE.CircleGeometry(2.2, 64),
-  new THREE.MeshStandardMaterial({ color: 0x1a1611, roughness: 1 })
+  new THREE.CircleGeometry(2.5, 64),
+  new THREE.MeshStandardMaterial({ color: 0x0a1020, roughness: 0.9 })
 );
-floor.rotation.x = -Math.PI/2;
-floor.position.y = 0;
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -0.05;
 scene.add(floor);
 
-// ---------- Mannequin (low-poly humanoid) ----------
-// Each body part has its own dynamic CanvasTexture for tattoo placement.
-const skinColor = 0xc9a07a;
-const skinMat = (canvasTex) => new THREE.MeshStandardMaterial({
-  color: skinColor,
-  roughness: 0.7,
-  metalness: 0.0,
-  map: canvasTex,
-});
+// ---- Tattoo canvas system -------------------------------------------
+//
+// Each body region has its own offscreen canvas + CanvasTexture. When the
+// user picks a motif, we re-render that region's canvas from scratch (skin
+// base, then the motif on top, with current scale/rotation/offset transforms).
+//
+// On the cylindrical limbs we use a wrap-around texture; on the torso we use
+// a forward-facing or back-facing UV strip so chest motifs only show on the
+// front and back motifs only show on the back.
 
-const PART_TEX_SIZE = 512;
+const REGIONS = ['chest', 'back', 'leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
 
-function makePartTexture() {
-  const c = document.createElement('canvas');
-  c.width = c.height = PART_TEX_SIZE;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#c9a07a';
-  ctx.fillRect(0,0,PART_TEX_SIZE,PART_TEX_SIZE);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return { canvas: c, ctx, tex, design: null };
+// State per region
+const regionState = {};
+for (const r of REGIONS) {
+  regionState[r] = {
+    motif: null,  // motif object
+    scale: 1,
+    rot: 0,
+    ox: 0,
+    oy: 0,
+    canvas: null,
+    ctx: null,
+    texture: null,
+  };
 }
 
-const parts = {}; // partKey -> { mesh, tex object, ... }
-
-function buildPart(name, geometry, position, rotation = [0,0,0]) {
-  const t = makePartTexture();
-  const mesh = new THREE.Mesh(geometry, skinMat(t.tex));
-  mesh.position.set(...position);
-  mesh.rotation.set(...rotation);
-  mesh.userData.partKey = name;
-  parts[name] = { mesh, ...t };
-  scene.add(mesh);
-  return mesh;
+function ensureCanvas(region) {
+  const s = regionState[region];
+  if (s.canvas) return s;
+  const cv = document.createElement('canvas');
+  // arms/legs: tall narrow strip; torso: wider square-ish
+  const isTorso = region === 'chest' || region === 'back';
+  cv.width = isTorso ? 1024 : 768;
+  cv.height = 1024;
+  s.canvas = cv;
+  s.ctx = cv.getContext('2d');
+  s.texture = new THREE.CanvasTexture(cv);
+  s.texture.colorSpace = THREE.SRGBColorSpace;
+  s.texture.anisotropy = 8;
+  return s;
 }
 
-// Torso (front = chest, back = back). We split logically — same mesh, different texture regions.
-// For simplicity we use one torso mesh but two virtual regions handled via offset in canvas.
-const torsoGeom = new THREE.CapsuleGeometry(0.45, 0.9, 6, 16);
-buildPart('torso', torsoGeom, [0, 1.45, 0]);
+function paintRegion(region) {
+  const s = ensureCanvas(region);
+  const ctx = s.ctx;
+  const w = s.canvas.width, h = s.canvas.height;
 
-// Head
-const headGeom = new THREE.SphereGeometry(0.27, 24, 24);
-const headMesh = new THREE.Mesh(headGeom, new THREE.MeshStandardMaterial({color: skinColor, roughness:.7}));
-headMesh.position.set(0, 2.25, 0);
-scene.add(headMesh);
+  // base skin (transparent so the underlying figure colour shows)
+  ctx.clearRect(0, 0, w, h);
+  s.texture.needsUpdate = true;
 
-// Neck
-const neckGeom = new THREE.CylinderGeometry(0.1, 0.13, 0.18, 16);
-const neckMesh = new THREE.Mesh(neckGeom, new THREE.MeshStandardMaterial({color: skinColor, roughness:.7}));
-neckMesh.position.set(0, 2.0, 0);
-scene.add(neckMesh);
-
-// Arms
-const armGeom = new THREE.CylinderGeometry(0.11, 0.13, 0.95, 16);
-buildPart('leftArm',  armGeom, [-0.6, 1.5, 0], [0, 0, Math.PI/12]);
-buildPart('rightArm', armGeom, [ 0.6, 1.5, 0], [0, 0, -Math.PI/12]);
-
-// Forearms (visual only, no tattoo region for v1)
-const forearmGeom = new THREE.CylinderGeometry(0.09, 0.11, 0.85, 16);
-const forearmMat = new THREE.MeshStandardMaterial({color: skinColor, roughness:.7});
-const lFore = new THREE.Mesh(forearmGeom, forearmMat); lFore.position.set(-0.78,0.6,0); lFore.rotation.z = Math.PI/12; scene.add(lFore);
-const rFore = new THREE.Mesh(forearmGeom, forearmMat); rFore.position.set( 0.78,0.6,0); rFore.rotation.z = -Math.PI/12; scene.add(rFore);
-
-// Legs
-const legGeom = new THREE.CylinderGeometry(0.16, 0.18, 1.0, 16);
-buildPart('leftLeg',  legGeom, [-0.22, 0.5, 0]);
-buildPart('rightLeg', legGeom, [ 0.22, 0.5, 0]);
-const shinGeom = new THREE.CylinderGeometry(0.13, 0.15, 0.85, 16);
-const lShin = new THREE.Mesh(shinGeom, forearmMat); lShin.position.set(-0.22,-0.45,0); scene.add(lShin);
-const rShin = new THREE.Mesh(shinGeom, forearmMat); rShin.position.set( 0.22,-0.45,0); scene.add(rShin);
-
-// Hips
-const hipGeom = new THREE.SphereGeometry(0.28, 16, 16);
-const hipMesh = new THREE.Mesh(hipGeom, forearmMat); hipMesh.position.set(0, 0.95, 0); hipMesh.scale.set(1.1, 0.6, 0.9); scene.add(hipMesh);
-
-// ---------- Tattoo painting ----------
-let activePart = 'chest';
-const partToCanvasKey = {
-  chest:    'torso',
-  back:     'torso',
-  leftArm:  'leftArm',
-  rightArm: 'rightArm',
-  leftLeg:  'leftLeg',
-  rightLeg: 'rightLeg',
-};
-// Each region defines the rectangle of its part's canvas to paint into.
-// Texture wraps cylindrically; U is around the cylinder, V is along height.
-const regionMap = {
-  chest:    { u: 0.0,  v: 0.45, w: 0.5, h: 0.4 }, // front of torso
-  back:     { u: 0.5,  v: 0.45, w: 0.5, h: 0.4 }, // back of torso
-  leftArm:  { u: 0.0,  v: 0.2,  w: 1.0, h: 0.6 },
-  rightArm: { u: 0.0,  v: 0.2,  w: 1.0, h: 0.6 },
-  leftLeg:  { u: 0.0,  v: 0.2,  w: 1.0, h: 0.6 },
-  rightLeg: { u: 0.0,  v: 0.2,  w: 1.0, h: 0.6 },
-};
-
-const transforms = {}; // partKey -> {scale, rot, offX, offY}
-function defaultT(){ return {scale:1, rot:0, offX:0, offY:0}; }
-Object.keys(regionMap).forEach(k => transforms[k] = defaultT());
-
-function paintRegion(partKey) {
-  const canvasKey = partToCanvasKey[partKey];
-  const part = parts[canvasKey];
-  if (!part) return;
-  const { ctx, canvas, tex } = part;
-  const region = regionMap[partKey];
-
-  // For torso we share canvas between chest+back, so don't wipe the whole thing.
-  // We clear just the region.
-  const rx = region.u * PART_TEX_SIZE;
-  const ry = region.v * PART_TEX_SIZE;
-  const rw = region.w * PART_TEX_SIZE;
-  const rh = region.h * PART_TEX_SIZE;
+  if (!s.motif) return;
 
   ctx.save();
-  ctx.fillStyle = '#c9a07a';
-  ctx.fillRect(rx, ry, rw, rh);
+  ctx.translate(w * 0.5 + s.ox * w, h * 0.5 + s.oy * h);
+  ctx.scale(s.scale, s.scale);
+  ctx.rotate(s.rot * Math.PI / 180);
+  ctx.translate(-w * 0.5, -h * 0.5);
+
+  s.motif.paint(ctx, w, h);
   ctx.restore();
+  s.texture.needsUpdate = true;
+}
 
-  const design = part.designs?.[partKey];
-  if (design) {
-    const t = transforms[partKey];
-    ctx.save();
-    ctx.translate(rx + rw/2 + t.offX*rw, ry + rh/2 + t.offY*rh);
-    ctx.rotate(t.rot * Math.PI / 180);
-    const dw = rw * t.scale;
-    const dh = rh * t.scale;
-    ctx.globalAlpha = 0.95;
-    ctx.drawImage(design.img, -dw/2, -dh/2, dw, dh);
-    ctx.restore();
+// ---- Figure builder --------------------------------------------------
+//
+// Build a stylised humanoid out of low-poly primitives. The result is way
+// nicer than detached cylinders because:
+//   - everything is parented (shoulder rotates the whole arm)
+//   - limbs are tapered (LatheGeometry) so they read as real bicep/forearm
+//   - male/female toggle swaps proportions
+//   - tattoo textures apply only to the body part you pick
+
+const SKIN_MALE   = new THREE.Color(0xc89f7b);
+const SKIN_FEMALE = new THREE.Color(0xd9b08c);
+const HAIR_COLOR  = 0x1a1410;
+
+let figure = null;
+let bodyParts = {}; // region -> { mesh, baseMaterial }
+
+function buildFigure(gender) {
+  if (figure) {
+    scene.remove(figure);
+    figure.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
   }
-  tex.needsUpdate = true;
+  bodyParts = {};
+
+  const skin = (gender === 'female' ? SKIN_FEMALE : SKIN_MALE).clone();
+
+  const isF = gender === 'female';
+  // proportions
+  const shoulderW = isF ? 0.42 : 0.55;
+  const waistW    = isF ? 0.28 : 0.38;
+  const hipW      = isF ? 0.42 : 0.40;
+  const torsoH    = 1.0;
+
+  figure = new THREE.Group();
+  figure.position.y = 0;
+
+  // ---- Head + neck
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.27, 32, 24),
+    skinMat(skin)
+  );
+  head.position.y = 2.5;
+  head.scale.set(0.95, 1.1, 1.0);
+  figure.add(head);
+
+  const hair = new THREE.Mesh(
+    new THREE.SphereGeometry(0.29, 32, 24, 0, Math.PI * 2, 0, Math.PI * 0.55),
+    new THREE.MeshStandardMaterial({ color: HAIR_COLOR, roughness: 0.6 })
+  );
+  hair.position.y = 2.55;
+  if (isF) hair.scale.set(1.0, 1.4, 1.0);
+  figure.add(hair);
+
+  const neck = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.085, 0.1, 0.18, 16),
+    skinMat(skin)
+  );
+  neck.position.y = 2.18;
+  figure.add(neck);
+
+  // ---- Torso
+  // Build torso as a lathe so we get smooth chest/waist taper
+  const torsoFront = buildTorso(shoulderW, waistW, hipW, torsoH, isF);
+  const chestMat = skinMat(skin);
+  const torsoMesh = new THREE.Mesh(torsoFront, chestMat);
+  torsoMesh.position.y = 1.55;
+  figure.add(torsoMesh);
+
+  // chest tattoo overlay (facing front) ---------------------------------
+  ensureCanvas('chest');
+  const chestOverlay = new THREE.Mesh(
+    new THREE.PlaneGeometry(shoulderW * 1.4, torsoH * 0.7),
+    overlayMat('chest')
+  );
+  chestOverlay.position.set(0, 1.7, shoulderW * 0.65);
+  figure.add(chestOverlay);
+  bodyParts.chest = { mesh: chestOverlay };
+
+  // back tattoo overlay (facing back) -----------------------------------
+  ensureCanvas('back');
+  const backOverlay = new THREE.Mesh(
+    new THREE.PlaneGeometry(shoulderW * 1.5, torsoH * 0.85),
+    overlayMat('back')
+  );
+  backOverlay.position.set(0, 1.7, -shoulderW * 0.65);
+  backOverlay.rotation.y = Math.PI;
+  figure.add(backOverlay);
+  bodyParts.back = { mesh: backOverlay };
+
+  // breast hint for female
+  if (isF) {
+    for (const dx of [-1, 1]) {
+      const breast = new THREE.Mesh(
+        new THREE.SphereGeometry(0.11, 16, 16),
+        chestMat
+      );
+      breast.position.set(dx * 0.13, 1.78, 0.27);
+      breast.scale.set(1, 1, 0.7);
+      figure.add(breast);
+    }
+  }
+
+  // ---- Arms — left & right
+  for (const side of ['leftArm', 'rightArm']) {
+    const sx = side === 'leftArm' ? 1 : -1;
+    const armGroup = new THREE.Group();
+    armGroup.position.set(sx * (shoulderW + 0.05), 2.05, 0);
+    armGroup.rotation.z = sx * -0.12;
+    figure.add(armGroup);
+
+    const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.13, 24, 16), skinMat(skin));
+    armGroup.add(shoulder);
+
+    // upper arm
+    const upper = new THREE.Mesh(
+      buildTaperedLimb(0.11, 0.085, 0.55, 24),
+      skinMat(skin)
+    );
+    upper.position.y = -0.32;
+    armGroup.add(upper);
+
+    // armOverlay — full arm tattoo strip wrapped on a thin cylinder
+    const armOverlay = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.115, 0.07, 1.05, 24, 1, true),
+      overlayMat(side)
+    );
+    armOverlay.position.y = -0.55;
+    armGroup.add(armOverlay);
+    bodyParts[side] = { mesh: armOverlay };
+
+    const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.085, 16, 12), skinMat(skin));
+    elbow.position.y = -0.62;
+    armGroup.add(elbow);
+
+    const fore = new THREE.Mesh(
+      buildTaperedLimb(0.085, 0.07, 0.55, 24),
+      skinMat(skin)
+    );
+    fore.position.y = -0.92;
+    armGroup.add(fore);
+
+    const hand = new THREE.Mesh(
+      new THREE.SphereGeometry(0.09, 16, 12),
+      skinMat(skin)
+    );
+    hand.position.y = -1.22;
+    hand.scale.set(0.85, 1.2, 0.7);
+    armGroup.add(hand);
+
+    ensureCanvas(side);
+  }
+
+  // ---- Hips
+  const hips = new THREE.Mesh(
+    new THREE.SphereGeometry(hipW, 24, 16),
+    skinMat(skin)
+  );
+  hips.position.y = 1.0;
+  hips.scale.set(1, 0.5, 0.9);
+  figure.add(hips);
+
+  // ---- Legs
+  for (const side of ['leftLeg', 'rightLeg']) {
+    const sx = side === 'leftLeg' ? 1 : -1;
+    const legGroup = new THREE.Group();
+    legGroup.position.set(sx * 0.16, 0.95, 0);
+    figure.add(legGroup);
+
+    const thigh = new THREE.Mesh(
+      buildTaperedLimb(0.16, 0.12, 0.65, 24),
+      skinMat(skin)
+    );
+    thigh.position.y = -0.35;
+    legGroup.add(thigh);
+
+    const legOverlay = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.165, 0.085, 1.5, 24, 1, true),
+      overlayMat(side)
+    );
+    legOverlay.position.y = -0.75;
+    legGroup.add(legOverlay);
+    bodyParts[side] = { mesh: legOverlay };
+
+    const knee = new THREE.Mesh(new THREE.SphereGeometry(0.115, 16, 12), skinMat(skin));
+    knee.position.y = -0.7;
+    legGroup.add(knee);
+
+    const shin = new THREE.Mesh(
+      buildTaperedLimb(0.115, 0.085, 0.7, 24),
+      skinMat(skin)
+    );
+    shin.position.y = -1.07;
+    legGroup.add(shin);
+
+    const foot = new THREE.Mesh(
+      new THREE.BoxGeometry(0.13, 0.08, 0.32),
+      skinMat(skin)
+    );
+    foot.position.set(0, -1.45, 0.07);
+    legGroup.add(foot);
+
+    ensureCanvas(side);
+  }
+
+  scene.add(figure);
+  // refresh all overlays
+  REGIONS.forEach(paintRegion);
 }
 
-function applyDesignToPart(partKey, img) {
-  const canvasKey = partToCanvasKey[partKey];
-  const part = parts[canvasKey];
-  part.designs = part.designs || {};
-  part.designs[partKey] = { img };
-  paintRegion(partKey);
-}
-
-function applyToActivePart() {
-  if (!activeMotif) return;
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => applyDesignToPart(activePart, img);
-  img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(activeMotif.svg);
-}
-
-// ---------- UI wiring ----------
-document.querySelectorAll('#bodyParts button').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('#bodyParts button').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    activePart = b.dataset.part;
-    // Load that region's transform values into sliders
-    const t = transforms[activePart];
-    document.getElementById('scale').value = t.scale;
-    document.getElementById('rot').value = t.rot;
-    document.getElementById('offX').value = t.offX;
-    document.getElementById('offY').value = t.offY;
-    syncSliderLabels();
-    setStatus(`Region: ${activePart}`);
+function skinMat(color) {
+  return new THREE.MeshStandardMaterial({
+    color, roughness: 0.55, metalness: 0.02,
   });
+}
+
+function overlayMat(region) {
+  const s = ensureCanvas(region);
+  return new THREE.MeshStandardMaterial({
+    map: s.texture,
+    transparent: true,
+    alphaTest: 0.02,
+    roughness: 0.65,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
+}
+
+// Tapered limb via LatheGeometry (smooth curve from r0 → r1 over height)
+function buildTaperedLimb(r0, r1, height, segments) {
+  const points = [];
+  const n = 12;
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const r = r0 * (1 - t) + r1 * t;
+    points.push(new THREE.Vector2(r, -t * height + height * 0.5));
+  }
+  return new THREE.LatheGeometry(points, segments);
+}
+
+// Torso shape from profile silhouette
+function buildTorso(shoulderW, waistW, hipW, height, female) {
+  const points = [];
+  const profile = [
+    [0,            -height * 0.5],
+    [hipW * 1.0,   -height * 0.45],
+    [hipW * 0.95,  -height * 0.25],
+    [waistW * 1.05, -height * 0.05],
+    [waistW,        height * 0.0],
+    [waistW * 1.1,  height * 0.15],
+    [shoulderW * 0.9, height * 0.3],
+    [shoulderW,     height * 0.45],
+    [shoulderW * 0.6, height * 0.5],
+    [0,             height * 0.5],
+  ];
+  for (const [r, y] of profile) points.push(new THREE.Vector2(r, y));
+  const lathe = new THREE.LatheGeometry(points, 24);
+  // squish front-to-back to make it more torso-like (less round)
+  const pos = lathe.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const z = pos.getZ(i);
+    pos.setZ(i, z * 0.55);
+  }
+  lathe.computeVertexNormals();
+  return lathe;
+}
+
+/* =================================================================
+   3. UI WIRING
+   ================================================================= */
+
+let activeRegion = 'chest';
+let activeNation = 'All';
+let unlocked = false;
+let activeMotifId = null;
+let gender = 'male';
+
+const motifScroll = document.getElementById('motifScroll');
+const nationTabs  = document.getElementById('nationTabs');
+const status      = document.getElementById('status');
+
+function renderNationTabs() {
+  nationTabs.innerHTML = '';
+  for (const n of NATIONS) {
+    const b = document.createElement('button');
+    b.className = 'nation-tab' + (activeNation === n ? ' active' : '');
+    b.textContent = n;
+    b.onclick = () => { activeNation = n; renderNationTabs(); renderMotifs(); };
+    nationTabs.appendChild(b);
+  }
+}
+
+function renderMotifs() {
+  motifScroll.innerHTML = '';
+  const groups = {};
+  for (const m of MOTIFS) {
+    if (activeNation !== 'All' && m.nation !== activeNation) continue;
+    if (!groups[m.nation]) groups[m.nation] = [];
+    groups[m.nation].push(m);
+  }
+  for (const nation of NATIONS) {
+    if (nation === 'All') continue;
+    if (!groups[nation]) continue;
+    const wrap = document.createElement('div');
+    wrap.className = 'nation-group';
+    const h = document.createElement('h3');
+    h.textContent = nation;
+    wrap.appendChild(h);
+    const grid = document.createElement('div');
+    grid.className = 'motif-grid';
+    for (const m of groups[nation]) {
+      const tile = document.createElement('button');
+      tile.className = 'motif' + (activeMotifId === m.id ? ' active' : '');
+      tile.title = `${m.name} — ${m.meaning}`;
+      // tiny preview canvas
+      const cv = document.createElement('canvas');
+      cv.width = 200; cv.height = 200;
+      const ctx = cv.getContext('2d');
+      m.paint(ctx, 200, 200);
+      const img = new Image();
+      img.src = cv.toDataURL();
+      img.alt = m.name;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'contain';
+      img.style.filter = 'invert(1) opacity(0.92)';
+      tile.appendChild(img);
+      const tip = document.createElement('span');
+      tip.className = 'tip';
+      tip.textContent = m.name;
+      tile.appendChild(tip);
+      tile.onclick = () => applyMotif(m);
+      grid.appendChild(tile);
+    }
+    wrap.appendChild(grid);
+    motifScroll.appendChild(wrap);
+  }
+}
+
+function applyMotif(motif) {
+  const s = regionState[activeRegion];
+  s.motif = motif;
+  // reset transforms so you see the motif fresh
+  s.scale = 1; s.rot = 0; s.ox = 0; s.oy = 0;
+  syncSliders();
+  paintRegion(activeRegion);
+  activeMotifId = motif.id;
+  renderMotifs();
+  status.textContent = `${motif.nation} · ${motif.name}`;
+}
+
+// Region buttons
+document.getElementById('regionGrid').addEventListener('click', e => {
+  const b = e.target.closest('.region-btn'); if (!b) return;
+  document.querySelectorAll('.region-btn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  activeRegion = b.dataset.r;
+  syncSliders();
 });
 
-function syncSliderLabels(){
-  document.getElementById('scaleVal').textContent = (+document.getElementById('scale').value).toFixed(2)+'×';
-  document.getElementById('rotVal').textContent = document.getElementById('rot').value+'°';
-  document.getElementById('xVal').textContent = (+document.getElementById('offX').value).toFixed(2);
-  document.getElementById('yVal').textContent = (+document.getElementById('offY').value).toFixed(2);
+// Sliders
+const $scale = document.getElementById('scale');
+const $rot   = document.getElementById('rot');
+const $ox    = document.getElementById('ox');
+const $oy    = document.getElementById('oy');
+function syncSliders() {
+  const s = regionState[activeRegion];
+  $scale.value = s.scale; document.getElementById('scaleVal').textContent = s.scale.toFixed(2) + '×';
+  $rot.value   = s.rot;   document.getElementById('rotVal').textContent   = `${s.rot.toFixed(0)}°`;
+  $ox.value    = s.ox;    document.getElementById('oxVal').textContent    = s.ox.toFixed(2);
+  $oy.value    = s.oy;    document.getElementById('oyVal').textContent    = s.oy.toFixed(2);
 }
-['scale','rot','offX','offY'].forEach(id => {
-  document.getElementById(id).addEventListener('input', () => {
-    const t = transforms[activePart];
-    t.scale = +document.getElementById('scale').value;
-    t.rot   = +document.getElementById('rot').value;
-    t.offX  = +document.getElementById('offX').value;
-    t.offY  = +document.getElementById('offY').value;
-    syncSliderLabels();
-    paintRegion(activePart);
-  });
+$scale.addEventListener('input', () => { regionState[activeRegion].scale = +$scale.value; document.getElementById('scaleVal').textContent = (+$scale.value).toFixed(2) + '×'; paintRegion(activeRegion); });
+$rot.addEventListener('input',   () => { regionState[activeRegion].rot   = +$rot.value;   document.getElementById('rotVal').textContent   = `${(+$rot.value).toFixed(0)}°`; paintRegion(activeRegion); });
+$ox.addEventListener('input',    () => { regionState[activeRegion].ox    = +$ox.value;    document.getElementById('oxVal').textContent    = (+$ox.value).toFixed(2); paintRegion(activeRegion); });
+$oy.addEventListener('input',    () => { regionState[activeRegion].oy    = +$oy.value;    document.getElementById('oyVal').textContent    = (+$oy.value).toFixed(2); paintRegion(activeRegion); });
+
+// Gender toggle
+document.getElementById('genderToggle').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#genderToggle button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  gender = b.dataset.g;
+  buildFigure(gender);
 });
 
+// Unlock flow
+const modal = document.getElementById('modalBack');
+document.getElementById('unlockBtn').addEventListener('click', () => {
+  if (unlocked) return;
+  modal.classList.add('open');
+});
+document.getElementById('laterBtn').addEventListener('click', () => modal.classList.remove('open'));
+document.getElementById('payBtn').addEventListener('click', () => {
+  unlocked = true;
+  modal.classList.remove('open');
+  document.getElementById('unlockBtn').classList.add('unlocked');
+  document.getElementById('unlockIcon').textContent = '✓';
+  document.getElementById('unlockText').textContent = 'AI Unlocked';
+  document.getElementById('aiCard').classList.remove('locked');
+  document.getElementById('aiCardTitle').textContent = 'AI Generate';
+  document.getElementById('genBtn').disabled = false;
+  status.textContent = 'AI generation unlocked (demo)';
+});
+
+// AI generate
+document.getElementById('genBtn').addEventListener('click', generate);
+
+// Clear / Save
 document.getElementById('clearBtn').addEventListener('click', () => {
-  Object.keys(parts).forEach(k => { parts[k].designs = {}; });
-  Object.keys(regionMap).forEach(k => paintRegion(k));
-  setStatus('Cleared');
+  for (const r of REGIONS) {
+    regionState[r].motif = null;
+    paintRegion(r);
+  }
+  activeMotifId = null;
+  renderMotifs();
+  status.textContent = 'Cleared';
 });
-
 document.getElementById('saveBtn').addEventListener('click', () => {
-  // Composite: render the scene to a PNG snapshot
+  // capture canvas as PNG
   renderer.render(scene, camera);
   const url = renderer.domElement.toDataURL('image/png');
   const a = document.createElement('a');
-  a.href = url; a.download = 'pacifik-design.png'; a.click();
-  setStatus('Saved snapshot');
+  a.href = url;
+  a.download = 'pacifik-look.png';
+  a.click();
+  status.textContent = 'Saved look';
 });
 
-// ---------- Paywall + AI Generate ----------
-let aiUnlocked = false;
-const unlockBtn = document.getElementById('unlockBtn');
-const aiBox = document.getElementById('aiBox');
-const aiBtn = document.getElementById('aiGenBtn');
-const paywall = document.getElementById('paywall');
-
-unlockBtn.addEventListener('click', () => paywall.classList.add('open'));
-document.getElementById('payBtn').addEventListener('click', () => {
-  // In production: kick off Shopify checkout for the "Design Pass" product, then
-  // verify entitlement on the page reload via cookie/customer metafield.
-  aiUnlocked = true;
-  unlockBtn.textContent = '✓ AI Unlocked';
-  unlockBtn.classList.remove('locked');
-  aiBox.classList.remove('locked');
-  aiBtn.disabled = false;
-  paywall.classList.remove('open');
-  setStatus('AI generation unlocked (demo)');
+// Mobile motif drawer
+document.getElementById('mobileMotifs').addEventListener('click', () => {
+  document.getElementById('leftRail').classList.toggle('mobile-open');
 });
 
-// API endpoint config:
-//   - Empty string ("") = same-origin (works once deployed to Vercel and the
-//     site is served from the same domain).
-//   - Or hardcode your Vercel URL, e.g. "https://pacifik-design-builder.vercel.app".
-//   - When opened as a local file:// URL, we fall back to the procedural mock
-//     so the demo still works offline.
-const API_BASE = '';
+/* =================================================================
+   4. AI GENERATE — talks to /api/generate
+   ================================================================= */
 
-aiBtn.addEventListener('click', async () => {
-  const prompt = document.getElementById('aiPrompt').value.trim();
-  if (!prompt) { setStatus('Enter a prompt first'); return; }
-  setStatus('Generating…');
-  aiBtn.disabled = true;
+const genOverlay = document.getElementById('genOverlay');
+
+async function generate() {
+  if (!unlocked) return;
+  const promptEl = document.getElementById('aiPrompt');
+  const prompt = promptEl.value.trim();
+  if (!prompt) {
+    status.textContent = 'Enter a prompt first';
+    promptEl.focus();
+    return;
+  }
+  genOverlay.classList.add('on');
+  status.textContent = 'Generating…';
   try {
-    const isLocalFile = location.protocol === 'file:';
-    const url = isLocalFile
-      ? await mockGenerate(prompt)
-      : await realGenerate(prompt, activePart);
+    const r = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-demo-pass': '1' },
+      body: JSON.stringify({ prompt, bodyPart: activeRegion }),
+    });
+    if (!r.ok) {
+      const text = await r.text();
+      throw new Error(`HTTP ${r.status}: ${text}`);
+    }
+    const { url } = await r.json();
+    // Use the AI image as a one-off motif on the active region
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      applyDesignToPart(activePart, img);
-      setStatus(isLocalFile ? 'Mock design applied (local mode)' : 'AI design applied');
-      aiBtn.disabled = false;
+      const motif = {
+        id: 'ai-' + Date.now(),
+        nation: 'AI',
+        name: 'Custom AI Design',
+        meaning: prompt,
+        paint: (ctx, w, h) => { ctx.drawImage(img, 0, 0, w, h); },
+      };
+      const s = regionState[activeRegion];
+      s.motif = motif;
+      s.scale = 1; s.rot = 0; s.ox = 0; s.oy = 0;
+      syncSliders();
+      paintRegion(activeRegion);
+      genOverlay.classList.remove('on');
+      status.textContent = 'AI design applied';
     };
     img.onerror = () => {
-      setStatus('Image failed to load');
-      aiBtn.disabled = false;
+      genOverlay.classList.remove('on');
+      status.textContent = 'AI image failed to load';
     };
     img.src = url;
   } catch (e) {
-    setStatus('Generation failed: ' + e.message);
-    aiBtn.disabled = false;
+    genOverlay.classList.remove('on');
+    status.textContent = 'Generation failed: ' + e.message;
   }
-});
-
-async function realGenerate(prompt, bodyPart) {
-  const r = await fetch(`${API_BASE}/api/generate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({
-      prompt,
-      bodyPart,
-      // TODO: pass real customerId once Shopify entitlement is wired
-      customerId: window.__pacifikCustomerId || null,
-    })
-  });
-  if (!r.ok) {
-    const t = await r.text();
-    throw new Error(`HTTP ${r.status}: ${t.slice(0, 120)}`);
-  }
-  const { url } = await r.json();
-  return url;
 }
 
-// Placeholder generator — draws a procedural "tribal" pattern from the prompt.
-// Will be replaced by a fetch() to /api/generate that proxies to Replicate.
-async function mockGenerate(prompt) {
-  return new Promise((resolve) => {
-    const c = document.createElement('canvas');
-    c.width = c.height = 512;
-    const x = c.getContext('2d');
-    x.fillStyle = 'rgba(0,0,0,0)';
-    x.fillRect(0,0,512,512);
-    x.fillStyle = '#0e0c0a';
-    // hash prompt to seed
-    let s = 0; for (const ch of prompt) s = (s*31 + ch.charCodeAt(0)) >>> 0;
-    function rand(){ s = (s*1664525 + 1013904223) >>> 0; return s / 0xffffffff; }
-    // bands of triangles + waves
-    for (let y=0; y<512; y+=64) {
-      for (let xi=0; xi<512; xi+=32) {
-        const flip = rand() > 0.5;
-        x.beginPath();
-        if (flip){ x.moveTo(xi,y); x.lineTo(xi+32,y); x.lineTo(xi+16,y+24); }
-        else { x.moveTo(xi,y+32); x.lineTo(xi+32,y+32); x.lineTo(xi+16,y+8); }
-        x.closePath();
-        x.fill();
-      }
-    }
-    // wave overlay
-    x.strokeStyle = '#0e0c0a'; x.lineWidth = 6;
-    for (let yy=20; yy<512; yy+=80){
-      x.beginPath();
-      for (let xx=0; xx<=512; xx+=8){
-        const py = yy + Math.sin((xx+s%200)/30)*10;
-        if (xx===0) x.moveTo(xx,py); else x.lineTo(xx,py);
-      }
-      x.stroke();
-    }
-    setTimeout(()=>resolve(c.toDataURL('image/png')), 600);
-  });
-}
+/* =================================================================
+   5. RENDER LOOP + RESIZE
+   ================================================================= */
 
-// ---------- Status + resize + render loop ----------
-function setStatus(t){ document.getElementById('status').textContent = t; }
-function resize(){
-  const r = canvas.parentElement.getBoundingClientRect();
-  renderer.setSize(r.width, r.height, false);
-  camera.aspect = r.width / r.height;
+function resize() {
+  const stage = document.querySelector('.stage');
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
 window.addEventListener('resize', resize);
-resize();
 
-function tick(){
+(function loop() {
   controls.update();
   renderer.render(scene, camera);
-  requestAnimationFrame(tick);
-}
-tick();
+  requestAnimationFrame(loop);
+})();
 
-// initial paints
-Object.keys(regionMap).forEach(k => paintRegion(k));
-syncSliderLabels();
+// boot
+buildFigure(gender);
+renderNationTabs();
+renderMotifs();
+syncSliders();
+resize();
 </script>
+
 </body>
 </html>
