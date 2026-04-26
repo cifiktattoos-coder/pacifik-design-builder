@@ -1,0 +1,1744 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Pacifik Elements — Design Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;700&display=swap" />
+<style>
+  /* -------------------------------------------------------------- design tokens */
+  :root {
+    --bg-0: #060912;
+    --bg-1: #0c1220;
+    --bg-2: #131b2d;
+    --line: rgba(255, 255, 255, 0.06);
+    --line-strong: rgba(255, 255, 255, 0.14);
+    --ink: #f6f4ee;
+    --ink-2: #c7cdd8;
+    --ink-3: #7d869b;
+    --gold: #d8b27c;
+    --gold-soft: #b08e5c;
+    --ocean: #2a6f9c;
+    --teal: #58c0c0;
+    --shadow-lg: 0 20px 60px -20px rgba(0, 0, 0, 0.65);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 22px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(42, 111, 156, 0.15), transparent 60%),
+      radial-gradient(900px 500px at 0% 100%, rgba(216, 178, 124, 0.08), transparent 60%),
+      var(--bg-0);
+    color: var(--ink);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  /* -------------------------------------------------------------- shell */
+  .app {
+    display: grid;
+    height: 100vh;
+    grid-template-rows: 64px 1fr 36px;
+    grid-template-columns: 320px 1fr 320px;
+    grid-template-areas:
+      "header header header"
+      "left   stage  right"
+      "status status status";
+  }
+  @media (max-width: 980px) {
+    .app {
+      grid-template-rows: 56px 50vh 1fr 32px;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "header"
+        "stage"
+        "right"
+        "status";
+    }
+    .left { display: none; }
+    .left.mobile-open { display: block; position: fixed; inset: 56px 0 0 0; z-index: 50; }
+  }
+
+  /* -------------------------------------------------------------- header */
+  .header {
+    grid-area: header;
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(6, 9, 18, 0.7);
+    backdrop-filter: saturate(140%) blur(10px);
+    z-index: 10;
+  }
+  .brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+  }
+  .brand .accent { color: var(--gold); }
+  .brand .sep { color: var(--ink-3); margin: 0 8px; }
+  .brand .sub { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 11px; letter-spacing: 0.24em; color: var(--ink-3); text-transform: uppercase; }
+  .grow { flex: 1; }
+
+  .gender-toggle {
+    display: inline-flex;
+    background: var(--bg-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .gender-toggle button {
+    border: 0; background: transparent; padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-3);
+    transition: all 0.18s ease;
+  }
+  .gender-toggle button.active { background: var(--gold); color: #1a1108; }
+
+  .unlock {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--gold-soft);
+    background: linear-gradient(180deg, rgba(216, 178, 124, 0.18), rgba(216, 178, 124, 0.06));
+    color: var(--gold);
+    padding: 8px 16px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    transition: all 0.2s ease;
+  }
+  .unlock:hover { background: linear-gradient(180deg, rgba(216, 178, 124, 0.32), rgba(216, 178, 124, 0.12)); }
+  .unlock.unlocked { color: var(--teal); border-color: rgba(88, 192, 192, 0.5); }
+
+  .mobile-motifs-btn {
+    display: none;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-2);
+    color: var(--ink);
+    padding: 8px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  @media (max-width: 980px) { .mobile-motifs-btn { display: inline-flex; } }
+
+  /* -------------------------------------------------------------- left rail */
+  .left {
+    grid-area: left;
+    border-right: 1px solid var(--line);
+    background: var(--bg-1);
+    display: flex; flex-direction: column;
+    min-height: 0;
+  }
+  .left h2 {
+    margin: 0; padding: 16px 18px 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .nation-tabs {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 0 14px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .nation-tab {
+    border: 1px solid var(--line-strong);
+    background: transparent; color: var(--ink-2);
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 6px 10px; border-radius: 999px;
+    transition: all 0.15s ease;
+  }
+  .nation-tab:hover { border-color: var(--gold-soft); color: var(--gold); }
+  .nation-tab.active { background: var(--gold); color: #1a1108; border-color: var(--gold); }
+
+  .motif-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 14px 24px;
+  }
+  .motif-scroll::-webkit-scrollbar { width: 8px; }
+  .motif-scroll::-webkit-scrollbar-track { background: transparent; }
+  .motif-scroll::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; }
+
+  .nation-group { margin-bottom: 18px; }
+  .nation-group h3 {
+    margin: 0 0 8px 4px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px; font-weight: 700; letter-spacing: 0.04em;
+    color: var(--gold);
+  }
+  .nation-group h3 .meaning {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-3); margin-left: 8px;
+  }
+
+  .motif-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  .motif {
+    aspect-ratio: 1;
+    background: linear-gradient(180deg, var(--bg-2), #0e1424);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+  }
+  .motif:hover { border-color: var(--gold-soft); transform: translateY(-1px); }
+  .motif.active { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(216, 178, 124, 0.2); }
+  .motif svg { width: 100%; height: 100%; color: var(--ink); }
+  .motif .tip {
+    position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: var(--ink-3);
+    white-space: nowrap;
+    opacity: 0; transition: opacity 0.15s ease;
+    pointer-events: none;
+  }
+  .motif:hover .tip { opacity: 1; }
+
+  .left .hint {
+    padding: 0 18px 16px;
+    font-size: 11px; color: var(--ink-3); line-height: 1.5;
+  }
+
+  /* -------------------------------------------------------------- stage */
+  .stage {
+    grid-area: stage;
+    position: relative;
+    background:
+      radial-gradient(800px 500px at 50% 60%, rgba(42, 111, 156, 0.22), transparent 70%),
+      radial-gradient(400px 300px at 50% 30%, rgba(216, 178, 124, 0.07), transparent 70%),
+      var(--bg-0);
+    overflow: hidden;
+  }
+  #c { width: 100%; height: 100%; display: block; }
+  .stage-hint {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    background: rgba(6, 9, 18, 0.65); border: 1px solid var(--line);
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+  }
+
+  /* -------------------------------------------------------------- right rail */
+  .right {
+    grid-area: right;
+    border-left: 1px solid var(--line);
+    background: var(--bg-1);
+    overflow-y: auto;
+    padding: 18px 18px 24px;
+  }
+  .right::-webkit-scrollbar { width: 8px; }
+  .right::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; }
+
+  .panel-title {
+    margin: 0 0 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .region-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    margin-bottom: 18px;
+  }
+  .region-btn {
+    border: 1px solid var(--line-strong); background: var(--bg-2);
+    padding: 10px; border-radius: var(--radius-md);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-2);
+    transition: all 0.15s ease;
+  }
+  .region-btn:hover { border-color: var(--gold-soft); color: var(--gold); }
+  .region-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(216, 178, 124, 0.08); }
+
+  .slider-row { margin-bottom: 14px; }
+  .slider-row .lbl {
+    display: flex; justify-content: space-between;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 6px;
+  }
+  .slider-row .val { color: var(--ink-2); }
+  input[type=range] {
+    width: 100%; appearance: none; background: var(--bg-2);
+    height: 6px; border-radius: 999px; outline: none; border: 1px solid var(--line);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--gold); cursor: pointer;
+    box-shadow: 0 0 0 4px rgba(216, 178, 124, 0.18);
+  }
+
+  .ai-card {
+    margin-top: 18px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: linear-gradient(180deg, rgba(42, 111, 156, 0.08), transparent);
+  }
+  .ai-card.locked { opacity: 0.5; }
+  .ai-card textarea {
+    width: 100%; resize: vertical; min-height: 64px; max-height: 140px;
+    background: var(--bg-0); color: var(--ink);
+    border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+    padding: 10px; font: inherit; font-size: 13px;
+    margin-bottom: 10px;
+  }
+  .ai-card textarea:focus { outline: 2px solid var(--gold-soft); border-color: var(--gold); }
+  .ai-card textarea::placeholder { color: var(--ink-3); }
+  .ai-card button.gen {
+    width: 100%;
+    border: 0;
+    background: linear-gradient(180deg, var(--gold), var(--gold-soft));
+    color: #1a1108;
+    padding: 12px; border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    transition: all 0.18s ease;
+  }
+  .ai-card button.gen:hover { transform: translateY(-1px); box-shadow: 0 8px 20px -8px rgba(216, 178, 124, 0.5); }
+  .ai-card button.gen:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .ai-card.locked button.gen { background: var(--bg-2); color: var(--ink-3); }
+
+  .right .actions {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;
+  }
+  .right .actions button {
+    border: 1px solid var(--line-strong); background: var(--bg-2);
+    padding: 10px; border-radius: var(--radius-sm);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-2);
+    transition: all 0.15s ease;
+  }
+  .right .actions button:hover { border-color: var(--gold-soft); color: var(--gold); }
+  .right .actions button.primary { background: var(--gold); color: #1a1108; border-color: var(--gold); }
+
+  /* -------------------------------------------------------------- status */
+  .status {
+    grid-area: status;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 18px;
+    border-top: 1px solid var(--line);
+    background: rgba(6, 9, 18, 0.7);
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .status .right-status { color: var(--ink-2); }
+
+  /* -------------------------------------------------------------- modal */
+  .modal-back {
+    position: fixed; inset: 0; background: rgba(6, 9, 18, 0.78); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-back.open { display: flex; }
+  .modal {
+    width: min(440px, 92vw);
+    background: var(--bg-1); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+    padding: 32px; text-align: center;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal h3 {
+    margin: 0 0 8px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px; color: var(--gold);
+  }
+  .modal p {
+    margin: 0 0 20px; color: var(--ink-2); line-height: 1.55; font-size: 14px;
+  }
+  .modal .price { color: var(--gold); font-weight: 700; }
+  .modal .row { display: flex; gap: 10px; justify-content: center; }
+  .modal .row button {
+    border: 0; padding: 12px 22px; border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .modal .row .later { background: transparent; border: 1px solid var(--line-strong); color: var(--ink-2); }
+  .modal .row .pay {
+    background: linear-gradient(180deg, var(--gold), var(--gold-soft));
+    color: #1a1108;
+  }
+  .modal .small { margin-top: 16px; font-size: 11px; color: var(--ink-3); }
+
+  /* -------------------------------------------------------------- generate spinner */
+  .generating {
+    position: absolute; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(6, 9, 18, 0.6); backdrop-filter: blur(6px);
+    z-index: 5;
+  }
+  .generating.on { display: flex; }
+  .generating .pill {
+    background: var(--bg-1); border: 1px solid var(--line-strong);
+    padding: 14px 22px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 12px;
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .generating .pill::before {
+    content: ''; width: 14px; height: 14px;
+    border: 2px solid var(--gold); border-right-color: transparent;
+    border-radius: 50%; animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============== HEADER ============== -->
+  <header class="header">
+    <div class="brand">
+      PACIFIK <span class="accent">ELEMENTS</span>
+      <span class="sep">—</span>
+      <span class="sub">Design Builder</span>
+    </div>
+    <div class="grow"></div>
+
+    <button class="mobile-motifs-btn" id="mobileMotifs">Motifs</button>
+
+    <div class="gender-toggle" id="genderToggle">
+      <button data-g="male"   class="active">Male</button>
+      <button data-g="female">Female</button>
+    </div>
+
+    <button class="unlock" id="unlockBtn">
+      <span id="unlockIcon">🔒</span>
+      <span id="unlockText">Unlock AI Generate</span>
+    </button>
+  </header>
+
+  <!-- ============== LEFT RAIL ============== -->
+  <aside class="left" id="leftRail">
+    <h2>Motif Library</h2>
+    <div class="nation-tabs" id="nationTabs"></div>
+    <div class="motif-scroll" id="motifScroll"></div>
+    <div class="hint">Tap a motif to apply it to the selected body region. Drag the figure to rotate.</div>
+  </aside>
+
+  <!-- ============== STAGE ============== -->
+  <main class="stage">
+    <canvas id="c"></canvas>
+    <div class="stage-hint">Drag to rotate · Scroll to zoom</div>
+    <div class="generating" id="genOverlay">
+      <div class="pill">Crafting your design</div>
+    </div>
+  </main>
+
+  <!-- ============== RIGHT RAIL ============== -->
+  <aside class="right">
+    <h2 class="panel-title">Body Region</h2>
+    <div class="region-grid" id="regionGrid">
+      <button class="region-btn active" data-r="fullArm">Full Arm Sleeve</button>
+      <button class="region-btn" data-r="upperArm">Upper Arm</button>
+      <button class="region-btn" data-r="forearm">Forearm Wrap</button>
+      <button class="region-btn" data-r="fullLeg">Full Leg Sleeve</button>
+      <button class="region-btn" data-r="calf">Calf Piece</button>
+      <button class="region-btn" data-r="chestPanel">Chest Panel</button>
+      <button class="region-btn" data-r="backPanel">Back Panel</button>
+    </div>
+
+    <div class="slider-row">
+      <div class="lbl"><span>Scale</span><span class="val" id="scaleVal">1.00×</span></div>
+      <input id="scale" type="range" min="0.4" max="2.2" step="0.01" value="1" />
+    </div>
+    <div class="slider-row">
+      <div class="lbl"><span>Rotation</span><span class="val" id="rotVal">0°</span></div>
+      <input id="rot" type="range" min="-180" max="180" step="1" value="0" />
+    </div>
+    <div class="slider-row">
+      <div class="lbl"><span>Offset X</span><span class="val" id="oxVal">0.00</span></div>
+      <input id="ox" type="range" min="-0.5" max="0.5" step="0.01" value="0" />
+    </div>
+    <div class="slider-row">
+      <div class="lbl"><span>Offset Y</span><span class="val" id="oyVal">0.00</span></div>
+      <input id="oy" type="range" min="-0.5" max="0.5" step="0.01" value="0" />
+    </div>
+
+    <div class="ai-card locked" id="aiCard">
+      <h2 class="panel-title" style="margin: 0 0 8px;">
+        <span id="aiCardTitle">AI Generate (Locked)</span>
+      </h2>
+      <textarea id="aiPrompt" placeholder="e.g. shark teeth + ocean waves, half sleeve, bold lines"></textarea>
+      <button id="genBtn" class="gen" disabled>Generate Design</button>
+    </div>
+
+    <div class="actions">
+      <button id="clearBtn">Clear</button>
+      <button id="saveBtn" class="primary">Save Look</button>
+    </div>
+  </aside>
+
+  <!-- ============== STATUS BAR ============== -->
+  <footer class="status">
+    <div>Pacifik Elements · Polynesian Tattoo Preview</div>
+    <div class="right-status" id="status">Ready</div>
+  </footer>
+
+</div>
+
+<!-- ============== PAYWALL MODAL ============== -->
+<div class="modal-back" id="modalBack">
+  <div class="modal">
+    <h3>Unlock AI Design Pass</h3>
+    <p>Get unlimited AI-generated Polynesian designs on your live 3D figure for 24 hours. <span class="price">$7.99</span></p>
+    <div class="row">
+      <button class="later" id="laterBtn">Maybe Later</button>
+      <button class="pay" id="payBtn">Unlock for $7.99</button>
+    </div>
+    <div class="small">In production this opens Shopify Checkout. For now, click Unlock to demo the flow.</div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }  from 'three/addons/loaders/GLTFLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+
+/* =================================================================
+   1. MOTIF LIBRARY — organised by Polynesian nation
+   ================================================================= */
+// Each motif is hand-authored as flat black SVG. The geometry is informed by
+// traditional patterns from each nation, and each one is annotated with its
+// cultural meaning so customers can pick something that resonates.
+//
+// `paint(g)` draws the motif into a 2D canvas context. We render at high res
+// (1024×1024) so the texture stays crisp on the 3D mesh.
+
+const COLOR_INK = '#0c1018';
+
+function fillStrokeBlack(ctx) { ctx.fillStyle = '#000'; ctx.strokeStyle = '#000'; ctx.lineWidth = 8; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; }
+
+const MOTIFS = [
+
+/* ------------------ SAMOA ------------------ */
+{
+  id: 'sam-niho-mano', nation: 'Samoa', name: 'Niho Mano', meaning: 'Shark teeth — strength & guidance',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const rows = 3, cols = 9;
+    for (let r = 0; r < rows; r++) {
+      const y = h * 0.18 + r * h * 0.22;
+      for (let c = 0; c < cols; c++) {
+        const x = w * (0.08 + c * 0.105);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + w * 0.052, y + h * 0.18);
+        ctx.lineTo(x - w * 0.052, y + h * 0.18);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+  }
+},
+{
+  id: 'sam-vaa', nation: 'Samoa', name: "Va'a", meaning: 'Canoe — journey & navigation',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cy = h * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.08, cy);
+    ctx.quadraticCurveTo(w * 0.5, cy - h * 0.18, w * 0.92, cy);
+    ctx.quadraticCurveTo(w * 0.5, cy + h * 0.06, w * 0.08, cy);
+    ctx.fill();
+    // Sail mast and sail lines
+    ctx.lineWidth = 14;
+    ctx.beginPath(); ctx.moveTo(w * 0.5, cy - h * 0.06); ctx.lineTo(w * 0.5, cy - h * 0.42); ctx.stroke();
+    for (let i = 0; i < 4; i++) {
+      const yy = cy - h * 0.40 + i * h * 0.085;
+      ctx.beginPath(); ctx.moveTo(w * 0.32, yy); ctx.lineTo(w * 0.68, yy); ctx.stroke();
+    }
+  }
+},
+{
+  id: 'sam-spearheads', nation: 'Samoa', name: 'Tao', meaning: 'Spearheads — courage & defense',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    for (let i = 0; i < 5; i++) {
+      const x = w * (0.15 + i * 0.175);
+      ctx.beginPath();
+      ctx.moveTo(x, h * 0.1);
+      ctx.lineTo(x + w * 0.07, h * 0.9);
+      ctx.lineTo(x - w * 0.07, h * 0.9);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+},
+{
+  id: 'sam-gogo', nation: 'Samoa', name: 'Gogo', meaning: 'Frigate bird — freedom & travel',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.42, cy + h * 0.05);
+    ctx.quadraticCurveTo(cx - w * 0.18, cy - h * 0.32, cx, cy - h * 0.04);
+    ctx.quadraticCurveTo(cx + w * 0.18, cy - h * 0.32, cx + w * 0.42, cy + h * 0.05);
+    ctx.lineTo(cx + w * 0.18, cy + h * 0.04);
+    ctx.lineTo(cx, cy + h * 0.18);
+    ctx.lineTo(cx - w * 0.18, cy + h * 0.04);
+    ctx.closePath();
+    ctx.fill();
+  }
+},
+{
+  id: 'sam-malu', nation: 'Samoa', name: 'Malu', meaning: 'Female protective tattoo motif',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5;
+    // Diamond grid
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 5; c++) {
+        const x = w * 0.18 + c * w * 0.16;
+        const y = h * 0.18 + r * h * 0.18;
+        ctx.beginPath();
+        ctx.moveTo(x, y - h * 0.06);
+        ctx.lineTo(x + w * 0.05, y);
+        ctx.lineTo(x, y + h * 0.06);
+        ctx.lineTo(x - w * 0.05, y);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+  }
+},
+{
+  id: 'sam-sun', nation: 'Samoa', name: "La'a", meaning: 'Sun — leadership & life force',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5, r = w * 0.18;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2;
+      const x1 = cx + Math.cos(a) * r * 1.18;
+      const y1 = cy + Math.sin(a) * r * 1.18;
+      const x2 = cx + Math.cos(a) * r * 2.1;
+      const y2 = cy + Math.sin(a) * r * 2.1;
+      ctx.lineWidth = 18;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    }
+  }
+},
+
+/* ------------------ MAORI ------------------ */
+{
+  id: 'mao-koru', nation: 'Maori', name: 'Koru', meaning: 'Unfurling fern — new life',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 28;
+    const cx = w * 0.5, cy = h * 0.55;
+    ctx.beginPath();
+    for (let t = 0; t < 6.5; t += 0.06) {
+      const r = t * 36;
+      const x = cx + Math.cos(t) * r;
+      const y = cy + Math.sin(t) * r;
+      if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // Bulb at center
+    ctx.beginPath(); ctx.arc(cx, cy, 22, 0, Math.PI * 2); ctx.fill();
+  }
+},
+{
+  id: 'mao-pikorua', nation: 'Maori', name: 'Pikorua', meaning: 'Twist — eternal bond',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 30;
+    const cx = w * 0.5;
+    // Two interlocking S curves
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.28, h * 0.18);
+    ctx.bezierCurveTo(cx + w * 0.18, h * 0.32, cx - w * 0.18, h * 0.68, cx + w * 0.28, h * 0.82);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + w * 0.28, h * 0.18);
+    ctx.bezierCurveTo(cx - w * 0.18, h * 0.32, cx + w * 0.18, h * 0.68, cx - w * 0.28, h * 0.82);
+    ctx.stroke();
+  }
+},
+{
+  id: 'mao-hei-matau', nation: 'Maori', name: 'Hei Matau', meaning: 'Fish hook — abundance & safe travel',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 38;
+    const cx = w * 0.5, cy = h * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, h * 0.12);
+    ctx.lineTo(cx, h * 0.5);
+    ctx.arc(cx - w * 0.18, h * 0.5, w * 0.18, 0, Math.PI, false);
+    ctx.lineTo(cx - w * 0.36, h * 0.32);
+    ctx.stroke();
+  }
+},
+{
+  id: 'mao-manaia', nation: 'Maori', name: 'Manaia', meaning: 'Spiritual guardian',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    // Stylised guardian figure
+    ctx.beginPath();
+    ctx.arc(cx, h * 0.28, w * 0.13, 0, Math.PI * 2);
+    ctx.fill();
+    // body curves
+    ctx.lineWidth = 26;
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.05, h * 0.4);
+    ctx.bezierCurveTo(cx - w * 0.32, h * 0.55, cx - w * 0.32, h * 0.78, cx, h * 0.88);
+    ctx.bezierCurveTo(cx + w * 0.32, h * 0.78, cx + w * 0.32, h * 0.55, cx + w * 0.05, h * 0.4);
+    ctx.stroke();
+    // eyes
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx - w * 0.05, h * 0.26, w * 0.025, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + w * 0.05, h * 0.26, w * 0.025, 0, Math.PI * 2); ctx.fill();
+  }
+},
+{
+  id: 'mao-mangopare', nation: 'Maori', name: 'Mangopare', meaning: 'Hammerhead shark — strength & determination',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 26;
+    const cx = w * 0.5, cy = h * 0.5;
+    // Two opposing curls
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.42, cy);
+    ctx.bezierCurveTo(cx - w * 0.42, cy - h * 0.35, cx - w * 0.05, cy - h * 0.35, cx - w * 0.05, cy);
+    ctx.bezierCurveTo(cx - w * 0.05, cy + h * 0.18, cx - w * 0.25, cy + h * 0.18, cx - w * 0.25, cy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + w * 0.42, cy);
+    ctx.bezierCurveTo(cx + w * 0.42, cy + h * 0.35, cx + w * 0.05, cy + h * 0.35, cx + w * 0.05, cy);
+    ctx.bezierCurveTo(cx + w * 0.05, cy - h * 0.18, cx + w * 0.25, cy - h * 0.18, cx + w * 0.25, cy);
+    ctx.stroke();
+  }
+},
+{
+  id: 'mao-unaunahi', nation: 'Maori', name: 'Unaunahi', meaning: 'Fish scales — abundance & health',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 12;
+    const r = w * 0.085;
+    for (let row = 0; row < 7; row++) {
+      const offset = (row % 2) * r;
+      for (let col = 0; col < 7; col++) {
+        const x = w * 0.08 + col * r * 2 + offset;
+        const y = h * 0.1 + row * r * 1.5;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI, false);
+        ctx.stroke();
+      }
+    }
+  }
+},
+
+/* ------------------ HAWAII ------------------ */
+{
+  id: 'haw-nalu', nation: 'Hawaii', name: 'Nalu', meaning: 'Ocean waves — change & resilience',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 24; ctx.lineCap = 'round';
+    for (let r = 0; r < 5; r++) {
+      const y = h * 0.18 + r * h * 0.16;
+      ctx.beginPath();
+      for (let x = w * 0.06; x <= w * 0.94; x += 4) {
+        const yy = y + Math.sin(x * 0.018 + r) * 14;
+        if (x === w * 0.06) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
+      }
+      ctx.stroke();
+    }
+  }
+},
+{
+  id: 'haw-honu', nation: 'Hawaii', name: 'Honu', meaning: 'Sea turtle — long life & navigator',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    // shell
+    ctx.beginPath(); ctx.ellipse(cx, cy, w * 0.32, h * 0.22, 0, 0, Math.PI * 2); ctx.fill();
+    // head
+    ctx.beginPath(); ctx.ellipse(cx, cy - h * 0.32, w * 0.09, h * 0.07, 0, 0, Math.PI * 2); ctx.fill();
+    // limbs
+    for (const dx of [-1, 1]) {
+      ctx.beginPath();
+      ctx.ellipse(cx + dx * w * 0.32, cy - h * 0.16, w * 0.12, h * 0.07, dx * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(cx + dx * w * 0.32, cy + h * 0.16, w * 0.12, h * 0.07, -dx * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // shell pattern
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2;
+      const x = cx + Math.cos(a) * w * 0.15;
+      const y = cy + Math.sin(a) * h * 0.1;
+      ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+},
+{
+  id: 'haw-niho-mano', nation: 'Hawaii', name: 'Niho Mano', meaning: 'Shark teeth — protection',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    // single staggered band
+    for (let r = 0; r < 2; r++) {
+      const y = h * 0.32 + r * h * 0.28;
+      const flip = r % 2;
+      for (let c = 0; c < 8; c++) {
+        const x = w * (0.1 + c * 0.115);
+        ctx.beginPath();
+        if (flip) {
+          ctx.moveTo(x, y + h * 0.22);
+          ctx.lineTo(x + w * 0.058, y);
+          ctx.lineTo(x - w * 0.058, y);
+        } else {
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + w * 0.058, y + h * 0.22);
+          ctx.lineTo(x - w * 0.058, y + h * 0.22);
+        }
+        ctx.closePath(); ctx.fill();
+      }
+    }
+  }
+},
+{
+  id: 'haw-kapa', nation: 'Hawaii', name: 'Kapa', meaning: 'Bark cloth pattern — heritage',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 8;
+    for (let i = 0; i < 8; i++) {
+      const y = h * (0.06 + i * 0.12);
+      ctx.beginPath(); ctx.moveTo(w * 0.06, y); ctx.lineTo(w * 0.94, y); ctx.stroke();
+    }
+    for (let i = 0; i < 8; i++) {
+      const x = w * (0.06 + i * 0.125);
+      for (let j = 0; j < 8; j++) {
+        const y = h * (0.12 + j * 0.12);
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+},
+{
+  id: 'haw-plumeria', nation: 'Hawaii', name: 'Plumeria', meaning: 'Aloha & new beginnings',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+      const px = cx + Math.cos(a) * w * 0.18;
+      const py = cy + Math.sin(a) * h * 0.18;
+      ctx.beginPath();
+      ctx.ellipse(px, py, w * 0.12, h * 0.08, a, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx, cy, w * 0.07, 0, Math.PI * 2); ctx.fill();
+  }
+},
+
+/* ------------------ TONGA ------------------ */
+{
+  id: 'ton-manulua', nation: 'Tonga', name: 'Manulua', meaning: 'Two birds — partnership & unity',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    // four diamonds in a cross
+    for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+      const x = cx + dx * w * 0.22;
+      const y = cy + dy * h * 0.22;
+      ctx.beginPath();
+      ctx.moveTo(x, y - h * 0.12);
+      ctx.lineTo(x + w * 0.1, y);
+      ctx.lineTo(x, y + h * 0.12);
+      ctx.lineTo(x - w * 0.1, y);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // center diamond
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - h * 0.08);
+    ctx.lineTo(cx + w * 0.07, cy);
+    ctx.lineTo(cx, cy + h * 0.08);
+    ctx.lineTo(cx - w * 0.07, cy);
+    ctx.closePath(); ctx.fill();
+  }
+},
+{
+  id: 'ton-lalava', nation: 'Tonga', name: 'Lalava', meaning: 'Sennit lashing — connection',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 14;
+    for (let i = -2; i < 8; i++) {
+      ctx.beginPath();
+      ctx.moveTo(w * 0.06, h * (0.1 + i * 0.12));
+      ctx.lineTo(w * 0.94, h * (0.1 + (i + 2) * 0.12));
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(w * 0.06, h * (0.1 + (i + 2) * 0.12));
+      ctx.lineTo(w * 0.94, h * (0.1 + i * 0.12));
+      ctx.stroke();
+    }
+  }
+},
+{
+  id: 'ton-kupesi', nation: 'Tonga', name: 'Kupesi', meaning: 'Geometric tapa motif',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 10;
+    const r = w * 0.13;
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        const x = w * 0.14 + col * w * 0.24;
+        const y = h * 0.14 + row * h * 0.24;
+        ctx.beginPath();
+        ctx.rect(x - r * 0.7, y - r * 0.7, r * 1.4, r * 1.4);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x - r * 0.7, y - r * 0.7);
+        ctx.lineTo(x + r * 0.7, y + r * 0.7);
+        ctx.moveTo(x + r * 0.7, y - r * 0.7);
+        ctx.lineTo(x - r * 0.7, y + r * 0.7);
+        ctx.stroke();
+      }
+    }
+  }
+},
+{
+  id: 'ton-fata', nation: 'Tonga', name: 'Fata', meaning: 'Stilts pattern — elevation',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 22;
+    for (let i = 0; i < 7; i++) {
+      const x = w * (0.08 + i * 0.135);
+      ctx.beginPath();
+      ctx.moveTo(x, h * 0.1);
+      ctx.lineTo(x, h * 0.78);
+      ctx.stroke();
+      // crossbars
+      if (i < 6) {
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(x + 4, h * 0.5);
+        ctx.lineTo(x + w * 0.135 - 4, h * 0.5);
+        ctx.stroke();
+        ctx.lineWidth = 22;
+      }
+    }
+  }
+},
+
+/* ------------------ MARQUESAS ------------------ */
+{
+  id: 'mar-enata', nation: 'Marquesas', name: 'Enata', meaning: 'Human figures — community & ancestors',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cnt = 5;
+    const cy = h * 0.5;
+    for (let i = 0; i < cnt; i++) {
+      const cx = w * (0.12 + i * 0.18);
+      // head
+      ctx.beginPath(); ctx.arc(cx, cy - h * 0.22, w * 0.04, 0, Math.PI * 2); ctx.fill();
+      // body
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - h * 0.16);
+      ctx.lineTo(cx, cy + h * 0.06);
+      ctx.lineWidth = 16; ctx.stroke();
+      // arms (linked)
+      ctx.lineWidth = 14;
+      ctx.beginPath();
+      ctx.moveTo(cx - w * 0.06, cy - h * 0.07);
+      ctx.lineTo(cx + w * 0.06, cy - h * 0.07);
+      ctx.stroke();
+      // legs
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + h * 0.06);
+      ctx.lineTo(cx - w * 0.04, cy + h * 0.22);
+      ctx.moveTo(cx, cy + h * 0.06);
+      ctx.lineTo(cx + w * 0.04, cy + h * 0.22);
+      ctx.stroke();
+    }
+  }
+},
+{
+  id: 'mar-tiki', nation: 'Marquesas', name: 'Tiki', meaning: 'Ancestor face — protector',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    // face outline
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.3, cy - h * 0.34);
+    ctx.lineTo(cx + w * 0.3, cy - h * 0.34);
+    ctx.lineTo(cx + w * 0.36, cy + h * 0.34);
+    ctx.lineTo(cx - w * 0.36, cy + h * 0.34);
+    ctx.closePath();
+    ctx.fill();
+    // eyes
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.ellipse(cx - w * 0.13, cy - h * 0.12, w * 0.07, h * 0.06, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + w * 0.13, cy - h * 0.12, w * 0.07, h * 0.06, 0, 0, Math.PI * 2); ctx.fill();
+    // pupils
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(cx - w * 0.13, cy - h * 0.12, w * 0.022, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + w * 0.13, cy - h * 0.12, w * 0.022, 0, Math.PI * 2); ctx.fill();
+    // mouth
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.rect(cx - w * 0.16, cy + h * 0.05, w * 0.32, h * 0.12);
+    ctx.fill();
+    // teeth
+    ctx.fillStyle = '#000';
+    for (let i = 0; i < 6; i++) {
+      const x = cx - w * 0.14 + i * w * 0.06;
+      ctx.beginPath();
+      ctx.moveTo(x, cy + h * 0.05);
+      ctx.lineTo(x + w * 0.025, cy + h * 0.17);
+      ctx.lineTo(x - w * 0.025, cy + h * 0.17);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+},
+{
+  id: 'mar-cross', nation: 'Marquesas', name: 'Marquesan Cross', meaning: 'Balance & harmony',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.06, cy - h * 0.32);
+    ctx.lineTo(cx + w * 0.06, cy - h * 0.32);
+    ctx.lineTo(cx + w * 0.06, cy - h * 0.06);
+    ctx.lineTo(cx + w * 0.32, cy - h * 0.06);
+    ctx.lineTo(cx + w * 0.32, cy + h * 0.06);
+    ctx.lineTo(cx + w * 0.06, cy + h * 0.06);
+    ctx.lineTo(cx + w * 0.06, cy + h * 0.32);
+    ctx.lineTo(cx - w * 0.06, cy + h * 0.32);
+    ctx.lineTo(cx - w * 0.06, cy + h * 0.06);
+    ctx.lineTo(cx - w * 0.32, cy + h * 0.06);
+    ctx.lineTo(cx - w * 0.32, cy - h * 0.06);
+    ctx.lineTo(cx - w * 0.06, cy - h * 0.06);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx, cy, w * 0.045, 0, Math.PI * 2); ctx.fill();
+  }
+},
+{
+  id: 'mar-mata', nation: 'Marquesas', name: 'Mata Hoata', meaning: 'Ancestor eyes — watchful protection',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    for (let row = 0; row < 3; row++) {
+      const y = h * 0.22 + row * h * 0.28;
+      for (let col = 0; col < 2; col++) {
+        const x = cx + (col === 0 ? -1 : 1) * w * 0.18;
+        ctx.beginPath();
+        ctx.ellipse(x, y, w * 0.13, h * 0.07, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(x, y, w * 0.045, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(x, y, w * 0.018, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+},
+{
+  id: 'mar-ipu', nation: 'Marquesas', name: 'Ipu', meaning: 'Gourd — abundance',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    for (let i = 0; i < 4; i++) {
+      const offset = (i % 2) * w * 0.22;
+      for (let j = 0; j < 3; j++) {
+        const x = w * 0.16 + offset + j * w * 0.22;
+        const y = h * 0.16 + i * h * 0.22;
+        ctx.beginPath();
+        ctx.ellipse(x, y, w * 0.08, h * 0.09, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.ellipse(x, y - h * 0.02, w * 0.025, h * 0.025, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+      }
+    }
+  }
+},
+
+/* ------------------ TAHITI ------------------ */
+{
+  id: 'tah-tiare', nation: 'Tahiti', name: 'Tiare', meaning: 'National flower — purity & love',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.5;
+    for (let i = 0; i < 7; i++) {
+      const a = (i / 7) * Math.PI * 2;
+      const px = cx + Math.cos(a) * w * 0.18;
+      const py = cy + Math.sin(a) * h * 0.18;
+      ctx.beginPath();
+      ctx.ellipse(px, py, w * 0.14, h * 0.07, a, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(cx, cy, w * 0.06, 0, Math.PI * 2); ctx.fill();
+  }
+},
+{
+  id: 'tah-paoa', nation: 'Tahiti', name: "Pa'oa", meaning: 'Priest figure — wisdom',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    const cx = w * 0.5, cy = h * 0.55;
+    // head
+    ctx.beginPath(); ctx.arc(cx, cy - h * 0.32, w * 0.08, 0, Math.PI * 2); ctx.fill();
+    // body
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.16, cy - h * 0.18);
+    ctx.lineTo(cx + w * 0.16, cy - h * 0.18);
+    ctx.lineTo(cx + w * 0.22, cy + h * 0.32);
+    ctx.lineTo(cx - w * 0.22, cy + h * 0.32);
+    ctx.closePath(); ctx.fill();
+    // arms
+    ctx.lineWidth = 22;
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.16, cy - h * 0.12);
+    ctx.lineTo(cx - w * 0.32, cy + h * 0.06);
+    ctx.moveTo(cx + w * 0.16, cy - h * 0.12);
+    ctx.lineTo(cx + w * 0.32, cy + h * 0.06);
+    ctx.stroke();
+  }
+},
+{
+  id: 'tah-reef', nation: 'Tahiti', name: 'Reef', meaning: 'Coral reef — life & abundance',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 12;
+    for (let i = 0; i < 14; i++) {
+      const x = w * (0.05 + i * 0.07);
+      const tall = h * (0.18 + Math.sin(i * 0.7) * 0.15 + 0.12);
+      ctx.beginPath();
+      ctx.moveTo(x, h * 0.85);
+      ctx.lineTo(x, h * 0.85 - tall);
+      ctx.stroke();
+      // branches
+      ctx.beginPath();
+      ctx.moveTo(x, h * 0.85 - tall * 0.5);
+      ctx.lineTo(x + w * 0.025, h * 0.85 - tall * 0.7);
+      ctx.moveTo(x, h * 0.85 - tall * 0.5);
+      ctx.lineTo(x - w * 0.025, h * 0.85 - tall * 0.7);
+      ctx.stroke();
+    }
+  }
+},
+{
+  id: 'tah-maraamu', nation: 'Tahiti', name: "Mara'amu", meaning: 'South wind — change',
+  paint: (ctx, w, h) => {
+    fillStrokeBlack(ctx);
+    ctx.lineWidth = 18;
+    const cx = w * 0.5, cy = h * 0.5;
+    for (let i = 0; i < 4; i++) {
+      const a = i / 4 * Math.PI * 2;
+      ctx.beginPath();
+      const x1 = cx + Math.cos(a) * w * 0.08;
+      const y1 = cy + Math.sin(a) * w * 0.08;
+      const x2 = cx + Math.cos(a) * w * 0.36;
+      const y2 = cy + Math.sin(a) * w * 0.36;
+      ctx.moveTo(x1, y1);
+      // curl
+      const cx2 = cx + Math.cos(a + 0.4) * w * 0.5;
+      const cy2 = cy + Math.sin(a + 0.4) * w * 0.5;
+      ctx.quadraticCurveTo(cx2, cy2, x2, y2);
+      ctx.stroke();
+    }
+  }
+},
+];
+
+const NATIONS = ['All', 'Samoa', 'Maori', 'Hawaii', 'Tonga', 'Marquesas', 'Tahiti'];
+
+/* =================================================================
+   2. THREE.JS — figure builder + tattoo texture system
+   ================================================================= */
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+camera.position.set(0, 1.4, 6.2);
+
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(0, 1.4, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minPolarAngle = Math.PI * 0.2;
+controls.maxPolarAngle = Math.PI * 0.85;
+controls.minDistance = 3.5;
+controls.maxDistance = 9;
+controls.enablePan = false;
+
+// Lighting — soft 3-point setup tuned for skin tones
+const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+scene.add(ambient);
+const key = new THREE.DirectionalLight(0xfff2dc, 1.0);
+key.position.set(3, 5, 4);
+scene.add(key);
+const fill = new THREE.DirectionalLight(0x6aa2c8, 0.5);
+fill.position.set(-3, 3, 2);
+scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffffff, 0.4);
+rim.position.set(0, 3, -4);
+scene.add(rim);
+
+// Floor disc
+const floor = new THREE.Mesh(
+  new THREE.CircleGeometry(2.5, 64),
+  new THREE.MeshStandardMaterial({ color: 0x0a1020, roughness: 0.9 })
+);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -0.05;
+scene.add(floor);
+
+// ---- Tattoo canvas system -------------------------------------------
+//
+// Each body region has its own offscreen canvas + CanvasTexture. When the
+// user picks a motif, we re-render that region's canvas from scratch (skin
+// base, then the motif on top, with current scale/rotation/offset transforms).
+//
+// On the cylindrical limbs we use a wrap-around texture; on the torso we use
+// a forward-facing or back-facing UV strip so chest motifs only show on the
+// front and back motifs only show on the back.
+
+const REGIONS = ['fullArm', 'upperArm', 'forearm', 'fullLeg', 'calf', 'chestPanel', 'backPanel'];
+
+// State per region
+const regionState = {};
+for (const r of REGIONS) {
+  regionState[r] = {
+    motif: null,  // motif object
+    scale: 1,
+    rot: 0,
+    ox: 0,
+    oy: 0,
+    canvas: null,
+    ctx: null,
+    texture: null,
+  };
+}
+
+function ensureCanvas(region) {
+  const s = regionState[region];
+  if (s.canvas) return s;
+  const cv = document.createElement('canvas');
+  // panels = wide; sleeves/wraps = tall (cylindrical wrap)
+  const isPanel = region === 'chestPanel' || region === 'backPanel';
+  cv.width = isPanel ? 1024 : 1024;
+  cv.height = isPanel ? 1024 : 2048;
+  s.canvas = cv;
+  s.ctx = cv.getContext('2d');
+  s.texture = new THREE.CanvasTexture(cv);
+  s.texture.colorSpace = THREE.SRGBColorSpace;
+  s.texture.anisotropy = 8;
+  return s;
+}
+
+function paintRegion(region) {
+  const s = ensureCanvas(region);
+  const ctx = s.ctx;
+  const w = s.canvas.width, h = s.canvas.height;
+
+  // base skin (transparent so the underlying figure colour shows)
+  ctx.clearRect(0, 0, w, h);
+  s.texture.needsUpdate = true;
+
+  if (!s.motif) return;
+
+  ctx.save();
+  ctx.translate(w * 0.5 + s.ox * w, h * 0.5 + s.oy * h);
+  ctx.scale(s.scale, s.scale);
+  ctx.rotate(s.rot * Math.PI / 180);
+  ctx.translate(-w * 0.5, -h * 0.5);
+
+  s.motif.paint(ctx, w, h);
+  ctx.restore();
+  s.texture.needsUpdate = true;
+}
+
+// ---- Figure builder --------------------------------------------------
+//
+// Build a stylised humanoid out of low-poly primitives. The result is way
+// nicer than detached cylinders because:
+//   - everything is parented (shoulder rotates the whole arm)
+//   - limbs are tapered (LatheGeometry) so they read as real bicep/forearm
+//   - male/female toggle swaps proportions
+//   - tattoo textures apply only to the body part you pick
+
+const SKIN_MALE   = new THREE.Color(0xc89f7b);
+const SKIN_FEMALE = new THREE.Color(0xd9b08c);
+const HAIR_COLOR  = 0x1a1410;
+
+let figure = null;
+let bodyParts = {}; // region -> { mesh, baseMaterial }
+
+function buildFigure(gender) {
+  if (figure) {
+    scene.remove(figure);
+    figure.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.dispose) o.material.dispose(); });
+  }
+  bodyParts = {};
+
+  const skinColor = gender === 'female' ? new THREE.Color(0xd9b08c) : new THREE.Color(0xc89f7b);
+
+  // Show a small "loading" placeholder while the GLB streams in
+  const placeholder = new THREE.Mesh(
+    new THREE.SphereGeometry(0.3, 16, 12),
+    new THREE.MeshStandardMaterial({ color: 0x444, transparent: true, opacity: 0.4 })
+  );
+  placeholder.position.y = 1.4;
+  figure = new THREE.Group();
+  figure.add(placeholder);
+  scene.add(figure);
+
+  const loader = new GLTFLoader();
+  // threejs.org hosts the Mixamo XBot rigged humanoid as a CC reference asset.
+  // Same model for both genders for now (proportions auto-adjusted via scale).
+  // Female: scale slightly narrower; Male: default.
+  const url = 'https://threejs.org/examples/models/gltf/Xbot.glb';
+  loader.load(
+    url,
+    (gltf) => {
+      // Replace placeholder with the loaded model
+      scene.remove(figure);
+      figure.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.dispose) o.material.dispose(); });
+
+      figure = SkeletonUtils.clone(gltf.scene);
+      figure.position.y = 0;
+      // XBot is ~1.8 units tall; scale up slightly so it fills the stage
+      const scaleFactor = gender === 'female' ? 1.32 : 1.4;
+      figure.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      // Female: narrower torso/shoulders
+      if (gender === 'female') {
+        figure.traverse(o => {
+          if (!o.isBone) return;
+          if (o.name && (o.name.includes('Spine') || o.name.includes('Shoulder'))) {
+            o.scale.x *= 0.92;
+            o.scale.z *= 0.95;
+          }
+        });
+      }
+
+      // Apply skin tone to all skinned mesh materials
+      figure.traverse(o => {
+        if (o.isMesh || o.isSkinnedMesh) {
+          o.material = new THREE.MeshStandardMaterial({
+            color: skinColor,
+            roughness: 0.55,
+            metalness: 0.05,
+            skinning: !!o.isSkinnedMesh,
+          });
+          o.castShadow = true;
+          o.receiveShadow = true;
+        }
+      });
+
+      // T-POSE positions for XBot at scale 1.4x. Arms extend horizontally; legs vertical.
+      // XBot pivot is at feet (y=0). Figure scale already applied via figure.scale.
+      const SHOULDER_Y = 1.40;   // figure-local (pre-scale) coords
+      const HIP_Y      = 0.95;
+      const KNEE_Y     = 0.45;
+      const ANKLE_Y    = 0.05;
+      const SHOULDER_X = 0.18;
+      const HAND_X     = 0.78;
+      const ELBOW_X    = 0.48;
+      const HIP_X      = 0.10;
+      const ARM_R      = 0.085;
+      const LEG_R      = 0.11;
+
+      // Horizontal cylindrical overlay along the X-axis (for T-pose arms)
+      function makeArmOverlay(region, side, xInner, xOuter, radius) {
+        const length = Math.abs(xOuter - xInner);
+        const cyl = new THREE.CylinderGeometry(radius, radius, length, 28, 1, true);
+        const mesh = new THREE.Mesh(cyl, overlayMat(region));
+        // Rotate cylinder so its axis is along X
+        mesh.rotation.z = Math.PI / 2;
+        mesh.position.set(side * (xInner + xOuter) / 2, SHOULDER_Y, 0);
+        figure.add(mesh);
+        bodyParts[region] = { mesh };
+      }
+
+      // Vertical cylindrical overlay along Y-axis (for legs)
+      function makeLegOverlay(region, side, yTop, yBot, radius) {
+        const length = yTop - yBot;
+        const mesh = new THREE.Mesh(
+          new THREE.CylinderGeometry(radius, radius, length, 28, 1, true),
+          overlayMat(region)
+        );
+        mesh.position.set(side * HIP_X, (yTop + yBot) / 2, 0);
+        figure.add(mesh);
+        bodyParts[region] = { mesh };
+      }
+
+      // Flat panel overlay on torso, facing +Z (chest) or -Z (back)
+      function makePanel(region, w, h, y, z) {
+        const mesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(w, h),
+          overlayMat(region)
+        );
+        mesh.position.set(0, y, z);
+        if (z < 0) mesh.rotation.y = Math.PI;
+        figure.add(mesh);
+        bodyParts[region] = { mesh };
+      }
+
+      // Right side (figure's right = viewer's left = -X in world)
+      const RIGHT = -1;
+      makeArmOverlay('fullArm',  RIGHT, SHOULDER_X, HAND_X,  ARM_R);
+      makeArmOverlay('upperArm', RIGHT, SHOULDER_X, ELBOW_X, ARM_R);
+      makeArmOverlay('forearm',  RIGHT, ELBOW_X,    HAND_X,  ARM_R * 0.92);
+
+      makeLegOverlay('fullLeg',  RIGHT, HIP_Y,  ANKLE_Y, LEG_R);
+      makeLegOverlay('calf',     RIGHT, KNEE_Y, ANKLE_Y, LEG_R * 0.90);
+
+      makePanel('chestPanel', 0.42, 0.42, 1.20,  0.16);
+      makePanel('backPanel',  0.50, 0.50, 1.20, -0.16);
+
+      scene.add(figure);
+      REGIONS.forEach(paintRegion);
+      if (typeof status !== 'undefined' && status) status.textContent = 'Figure loaded';
+    },
+    undefined,
+    (err) => {
+      console.error('GLB load failed', err);
+      if (typeof status !== 'undefined' && status) status.textContent = 'Figure load failed (will retry)';
+    }
+  );
+}
+
+function skinMat(color) {
+  return new THREE.MeshStandardMaterial({
+    color, roughness: 0.55, metalness: 0.02,
+  });
+}
+
+function overlayMat(region) {
+  const s = ensureCanvas(region);
+  return new THREE.MeshStandardMaterial({
+    map: s.texture,
+    transparent: true,
+    alphaTest: 0.02,
+    roughness: 0.65,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
+}
+
+// Tapered limb via LatheGeometry (smooth curve from r0 → r1 over height)
+function buildTaperedLimb(r0, r1, height, segments) {
+  const points = [];
+  const n = 12;
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const r = r0 * (1 - t) + r1 * t;
+    points.push(new THREE.Vector2(r, -t * height + height * 0.5));
+  }
+  return new THREE.LatheGeometry(points, segments);
+}
+
+// Torso shape from profile silhouette
+function buildTorso(shoulderW, waistW, hipW, height, female) {
+  const points = [];
+  const profile = [
+    [0,            -height * 0.5],
+    [hipW * 1.0,   -height * 0.45],
+    [hipW * 0.95,  -height * 0.25],
+    [waistW * 1.05, -height * 0.05],
+    [waistW,        height * 0.0],
+    [waistW * 1.1,  height * 0.15],
+    [shoulderW * 0.9, height * 0.3],
+    [shoulderW,     height * 0.45],
+    [shoulderW * 0.6, height * 0.5],
+    [0,             height * 0.5],
+  ];
+  for (const [r, y] of profile) points.push(new THREE.Vector2(r, y));
+  const lathe = new THREE.LatheGeometry(points, 24);
+  // squish front-to-back to make it more torso-like (less round)
+  const pos = lathe.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const z = pos.getZ(i);
+    pos.setZ(i, z * 0.55);
+  }
+  lathe.computeVertexNormals();
+  return lathe;
+}
+
+/* =================================================================
+   3. UI WIRING
+   ================================================================= */
+
+let activeRegion = 'fullArm';
+let activeNation = 'All';
+let unlocked = false;
+let activeMotifId = null;
+let gender = 'male';
+
+const motifScroll = document.getElementById('motifScroll');
+const nationTabs  = document.getElementById('nationTabs');
+const status      = document.getElementById('status');
+
+function renderNationTabs() {
+  nationTabs.innerHTML = '';
+  for (const n of NATIONS) {
+    const b = document.createElement('button');
+    b.className = 'nation-tab' + (activeNation === n ? ' active' : '');
+    b.textContent = n;
+    b.onclick = () => { activeNation = n; renderNationTabs(); renderMotifs(); };
+    nationTabs.appendChild(b);
+  }
+}
+
+function renderMotifs() {
+  motifScroll.innerHTML = '';
+  const groups = {};
+  for (const m of MOTIFS) {
+    if (activeNation !== 'All' && m.nation !== activeNation) continue;
+    if (!groups[m.nation]) groups[m.nation] = [];
+    groups[m.nation].push(m);
+  }
+  for (const nation of NATIONS) {
+    if (nation === 'All') continue;
+    if (!groups[nation]) continue;
+    const wrap = document.createElement('div');
+    wrap.className = 'nation-group';
+    const h = document.createElement('h3');
+    h.textContent = nation;
+    wrap.appendChild(h);
+    const grid = document.createElement('div');
+    grid.className = 'motif-grid';
+    for (const m of groups[nation]) {
+      const tile = document.createElement('button');
+      tile.className = 'motif' + (activeMotifId === m.id ? ' active' : '');
+      tile.title = `${m.name} — ${m.meaning}`;
+      // tiny preview canvas
+      const cv = document.createElement('canvas');
+      cv.width = 200; cv.height = 200;
+      const ctx = cv.getContext('2d');
+      m.paint(ctx, 200, 200);
+      const img = new Image();
+      img.src = cv.toDataURL();
+      img.alt = m.name;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'contain';
+      img.style.filter = 'invert(1) opacity(0.92)';
+      tile.appendChild(img);
+      const tip = document.createElement('span');
+      tip.className = 'tip';
+      tip.textContent = m.name;
+      tile.appendChild(tip);
+      tile.onclick = () => applyMotif(m);
+      grid.appendChild(tile);
+    }
+    wrap.appendChild(grid);
+    motifScroll.appendChild(wrap);
+  }
+}
+
+function applyMotif(motif) {
+  const s = regionState[activeRegion];
+  s.motif = motif;
+  // reset transforms so you see the motif fresh
+  s.scale = 1; s.rot = 0; s.ox = 0; s.oy = 0;
+  syncSliders();
+  paintRegion(activeRegion);
+  activeMotifId = motif.id;
+  renderMotifs();
+  status.textContent = `${motif.nation} · ${motif.name}`;
+}
+
+// Region buttons
+document.getElementById('regionGrid').addEventListener('click', e => {
+  const b = e.target.closest('.region-btn'); if (!b) return;
+  document.querySelectorAll('.region-btn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  activeRegion = b.dataset.r;
+  syncSliders();
+});
+
+// Sliders
+const $scale = document.getElementById('scale');
+const $rot   = document.getElementById('rot');
+const $ox    = document.getElementById('ox');
+const $oy    = document.getElementById('oy');
+function syncSliders() {
+  const s = regionState[activeRegion];
+  $scale.value = s.scale; document.getElementById('scaleVal').textContent = s.scale.toFixed(2) + '×';
+  $rot.value   = s.rot;   document.getElementById('rotVal').textContent   = `${s.rot.toFixed(0)}°`;
+  $ox.value    = s.ox;    document.getElementById('oxVal').textContent    = s.ox.toFixed(2);
+  $oy.value    = s.oy;    document.getElementById('oyVal').textContent    = s.oy.toFixed(2);
+}
+$scale.addEventListener('input', () => { regionState[activeRegion].scale = +$scale.value; document.getElementById('scaleVal').textContent = (+$scale.value).toFixed(2) + '×'; paintRegion(activeRegion); });
+$rot.addEventListener('input',   () => { regionState[activeRegion].rot   = +$rot.value;   document.getElementById('rotVal').textContent   = `${(+$rot.value).toFixed(0)}°`; paintRegion(activeRegion); });
+$ox.addEventListener('input',    () => { regionState[activeRegion].ox    = +$ox.value;    document.getElementById('oxVal').textContent    = (+$ox.value).toFixed(2); paintRegion(activeRegion); });
+$oy.addEventListener('input',    () => { regionState[activeRegion].oy    = +$oy.value;    document.getElementById('oyVal').textContent    = (+$oy.value).toFixed(2); paintRegion(activeRegion); });
+
+// Gender toggle
+document.getElementById('genderToggle').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#genderToggle button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  gender = b.dataset.g;
+  buildFigure(gender);
+});
+
+// Unlock flow
+const modal = document.getElementById('modalBack');
+document.getElementById('unlockBtn').addEventListener('click', () => {
+  if (unlocked) return;
+  modal.classList.add('open');
+});
+document.getElementById('laterBtn').addEventListener('click', () => modal.classList.remove('open'));
+document.getElementById('payBtn').addEventListener('click', () => {
+  unlocked = true;
+  modal.classList.remove('open');
+  document.getElementById('unlockBtn').classList.add('unlocked');
+  document.getElementById('unlockIcon').textContent = '✓';
+  document.getElementById('unlockText').textContent = 'AI Unlocked';
+  document.getElementById('aiCard').classList.remove('locked');
+  document.getElementById('aiCardTitle').textContent = 'AI Generate';
+  document.getElementById('genBtn').disabled = false;
+  status.textContent = 'AI generation unlocked (demo)';
+});
+
+// AI generate
+document.getElementById('genBtn').addEventListener('click', generate);
+
+// Clear / Save
+document.getElementById('clearBtn').addEventListener('click', () => {
+  for (const r of REGIONS) {
+    regionState[r].motif = null;
+    paintRegion(r);
+  }
+  activeMotifId = null;
+  renderMotifs();
+  status.textContent = 'Cleared';
+});
+document.getElementById('saveBtn').addEventListener('click', () => {
+  // capture canvas as PNG
+  renderer.render(scene, camera);
+  const url = renderer.domElement.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pacifik-look.png';
+  a.click();
+  status.textContent = 'Saved look';
+});
+
+// Mobile motif drawer
+document.getElementById('mobileMotifs').addEventListener('click', () => {
+  document.getElementById('leftRail').classList.toggle('mobile-open');
+});
+
+/* =================================================================
+   4. AI GENERATE — talks to /api/generate
+   ================================================================= */
+
+const genOverlay = document.getElementById('genOverlay');
+
+async function generate() {
+  if (!unlocked) return;
+  const promptEl = document.getElementById('aiPrompt');
+  const prompt = promptEl.value.trim();
+  if (!prompt) {
+    status.textContent = 'Enter a prompt first';
+    promptEl.focus();
+    return;
+  }
+  genOverlay.classList.add('on');
+  status.textContent = 'Generating…';
+  try {
+    const r = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-demo-pass': '1' },
+      body: JSON.stringify({ prompt, bodyPart: activeRegion }),
+    });
+    if (!r.ok) {
+      const text = await r.text();
+      throw new Error(`HTTP ${r.status}: ${text}`);
+    }
+    const { url } = await r.json();
+    // Use the AI image as a one-off motif on the active region
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const motif = {
+        id: 'ai-' + Date.now(),
+        nation: 'AI',
+        name: 'Custom AI Design',
+        meaning: prompt,
+        paint: (ctx, w, h) => { ctx.drawImage(img, 0, 0, w, h); },
+      };
+      const s = regionState[activeRegion];
+      s.motif = motif;
+      s.scale = 1; s.rot = 0; s.ox = 0; s.oy = 0;
+      syncSliders();
+      paintRegion(activeRegion);
+      genOverlay.classList.remove('on');
+      status.textContent = 'AI design applied';
+    };
+    img.onerror = () => {
+      genOverlay.classList.remove('on');
+      status.textContent = 'AI image failed to load';
+    };
+    img.src = url;
+  } catch (e) {
+    genOverlay.classList.remove('on');
+    status.textContent = 'Generation failed: ' + e.message;
+  }
+}
+
+/* =================================================================
+   5. RENDER LOOP + RESIZE
+   ================================================================= */
+
+function resize() {
+  const stage = document.querySelector('.stage');
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+
+(function loop() {
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+})();
+
+// boot
+buildFigure(gender);
+renderNationTabs();
+renderMotifs();
+syncSliders();
+resize();
+</script>
+
+</body>
+</html>
